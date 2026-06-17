@@ -1,0 +1,17 @@
+# Python trash
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Flask Configuration and Instance
+instance/
+.env
+
+# Hidden editor folders 
+.vscode/
+.idea/
