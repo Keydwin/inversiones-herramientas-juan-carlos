@@ -74,10 +74,12 @@
             <h1 class="page-title">Marcas</h1>
 
             <div class="action-bar">
-                <div class="search-container">
-                    <span class="material-symbols-outlined search-icon">search</span>
-                    <input type="text" id="trademarkSearch" placeholder="Ingresar Nombre para la busqueda">
-                </div>
+                <form action="{{ url_for('trademark.query_trademarks') }}" method="GET">
+                    <div class="search-container">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" name="q" placeholder="Ingresar Nombre para la búsqueda" value="{{ search_query or '' }}">
+                    </div>
+                </form>
                 
                 <button class="btn-register" id="openTrademarkModalBtn">Registrar</button>
                 
@@ -96,15 +98,36 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for trademark in trademarks %}
+                        {% for trademark in pagination.items %}
                             <tr>
-                                <td>{{ trademark.Marca }}</td>
+                                <td data-buscar="nombre">{{ trademark.Marca }}</td>
                                 <td class="text-center">
-                                    </td>
+                                    <button class="action-btn pay-btn"><span class="material-symbols-outlined">payments</span>Pagar</button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center">No se encontraron marcas registradas</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <div id="paginationControls" class="pagination-container">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page - 1, q=search_query) }}" class="btn-page">Anterior</a>
+                {% else %}
+                    <span class="btn-page disabled">Anterior</span>
+                {% endif %}
+
+                <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
+
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page + 1, q=search_query) }}" class="btn-page">Siguiente</a>
+                {% else %}
+                    <span class="btn-page disabled">Siguiente</span>
+                {% endif %}
             </div>
         </main>
     </div>
@@ -112,7 +135,7 @@
     <div class="modal-overlay" id="TrademarkModal">
         <div class="modal-card">
             <h2>Registro de Marca</h2>
-            <form id="TrademarkForm" action="#" method="#">
+            <form id="TrademarkForm" action="{{ url_for('trademark.register_trademark') }}" method="POST">
                 <div class="form-group">
                     <label for="Marca">Nombre de la Marca</label>
                     <input type="text" id="Marca" name="Marca" placeholder="Ingrese el nombre de la marca" required>
