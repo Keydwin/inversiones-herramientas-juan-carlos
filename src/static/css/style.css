@@ -339,7 +339,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px; 
-    padding: 6px 12px;
+    padding: 4px;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
@@ -619,6 +619,50 @@ body {
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
+}
+
+/* PAGINATION */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-page {
+    padding: 8px 16px;
+    background-color: var(--primary-teal); 
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+.btn-page:hover {
+    background-color: var(--primary-dark-teal); 
+}
+
+.btn-page:active {
+    transform: scale(0.98); 
+}
+
+
+.btn-page.disabled {
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+    pointer-events: none; 
+    transform: none;
+}
+
+.page-indicator {
+    font-size: 14px;
+    font-weight: bold;
+    color: #555555;
 }
 
 /* RESPONSIVE DESIGN */

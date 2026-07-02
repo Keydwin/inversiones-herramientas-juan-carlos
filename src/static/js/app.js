@@ -8,9 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeTrademarkBtn = document.getElementById('closeTrademarkBtn');
     const TrademarkModal = document.getElementById('TrademarkModal');
     const TrademarkForm = document.getElementById('TrademarkForm');
-    const searchInput = document.getElementById('searchInput');
     const dropdowns = document.querySelectorAll('.dropdown-toggle');
-    const trademarkSearch = document.getElementById('trademarkSearch');
+    const trademarkInput = document.getElementById('Marca');
 
     // SUBMENU CONTROL
     dropdowns.forEach(btn => {
@@ -39,43 +38,32 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.toggle('collapsed');
     });
 
-    // PRODUCT MODAL WINDOW SWITCHES
 
-        // OPEN PRODUCT MODAL WINDOW
+
+        // OPEN TRADEMARK MODAL WINDOW
         openTrademarkModalBtn.addEventListener('click', () => {
             TrademarkForm.reset(); // CLEAR INPUTS UPON OPENING
             TrademarkModal.classList.add('active');
         });
 
-        // CLOSE PRODUCT MODAL WINDOW
+        // CLOSE TRADEMARK MODAL WINDOW
         closeTrademarkBtn.addEventListener('click', () => {
             TrademarkModal.classList.remove('active');
         });
 
+        // TRADEMARK input
+        if (trademarkInput) {
 
+            trademarkInput.maxLength = 30;
 
-    // SEARCH FILTER FOR TRADEMARKS
-    if (trademarkSearch) {
-        trademarkSearch.addEventListener('keyup', () => {
-            const filterValue = trademarkSearch.value.toLowerCase();
-            // Select all rows in the table body
-            const tableRows = document.querySelectorAll('.data-table tbody tr');
+            trademarkInput.addEventListener('input', (e) => {
 
-            tableRows.forEach(row => {
-                // We get the text from the first cell
-                const trademarkCell = row.querySelector('td');
+                    const invalidCharacters = /[^A-Za-zÁéíóúÁÉÍÓÚñÑ ]/g;
                 
-                if (trademarkCell) {
-                    const trademarkText = trademarkCell.textContent.toLowerCase();
-                    
-                    // If the brand text contains what we wrote, it is displayed; if not, it is hidden.
-                    if (trademarkText.includes(filterValue)) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
+                if (invalidCharacters.test(e.target.value)) {
+                    e.target.value = e.target.value.replace(invalidCharacters, '');
                 }
             });
-        });
+
     }
-})
+});
