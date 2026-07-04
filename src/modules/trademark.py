@@ -40,3 +40,15 @@ def register_trademark():
             
     # Redirect back to trademarks list
     return redirect(url_for('trademark.query_trademarks'))
+
+@trademark_blueprint.route('/update_trademark/<int:IdMarca>', methods=['POST'])
+def update_trademark(IdMarca):
+    # Buscamos en Postgres usando el ID exacto
+    trademark = Marca.query.get_or_404(IdMarca)
+    trademark_name = request.form.get('Marca')
+    
+    if trademark_name:
+        trademark.Marca = trademark_name.strip()
+        db.session.commit()
+        
+    return redirect(url_for('trademark.query_trademarks'))
