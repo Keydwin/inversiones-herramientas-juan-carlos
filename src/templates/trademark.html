@@ -77,7 +77,7 @@
                 <form action="{{ url_for('trademark.query_trademarks') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="q" placeholder="Ingresar Nombre para la búsqueda" value="{{ search_query or '' }}">
+                        <input type="text" name="q" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
                     </div>
                 </form>
                 
@@ -100,9 +100,11 @@
                     <tbody>
                         {% for trademark in pagination.items %}
                             <tr>
-                                <td data-buscar="nombre">{{ trademark.Marca }}</td>
+                                <td data-buscar="nombre">{{ trademark.Marca|trim }}</td>
                                 <td class="text-center">
-                                    <button class="action-btn pay-btn"><span class="material-symbols-outlined">payments</span>Pagar</button>
+                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
+                                        <span class="material-symbols-outlined">edit</span>Editar
+                                    </button>
                                 </td>
                             </tr>
                         {% else %}
@@ -148,5 +150,23 @@
             </form>
         </div>
     </div>
+
+    <div class="modal-overlay" id="UpdateTrademarkModal">
+        <div class="modal-card">
+            <h2>Modificar Marca</h2>
+            <form id="UpdateTrademarkForm" action="" method="POST">
+                <div class="form-group">
+                    <label for="MarcaModificar">Nombre de la Marca</label>
+                    <input type="text" id="MarcaModificar" name="Marca" placeholder="Modifique el nombre de la marca" required>
+                </div>
+                
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeUpdateBtn">Cancelar</button>
+                    <button type="submit" class="btn-modify">Guardar Cambios</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>
