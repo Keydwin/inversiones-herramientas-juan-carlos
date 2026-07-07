@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, request
-from models import db, Marca  
+from flask import Blueprint, render_template, redirect, url_for, request, flash
+from models import db, Marca, Producto  
 
 # Create the Blueprint for the branding module
 trademark_blueprint = Blueprint('trademark', __name__)
@@ -28,8 +28,14 @@ def query_trademarks():
 @trademark_blueprint.route('/register_trademark', methods=['POST'])
 def register_trademark():
     # Get value from form input
-    trademark_name = request.form.get('Marca')
-    
+    trademark_name = request.form.get('Marca').strip()
+        
+    # Verify that no trademark with the same name exists.
+    existe = Marca.query.filter_by(Marca=trademark_name).first()
+    if existe:
+        flash("Esta marca ya se encuentra registrada.", "danger")
+        return redirect(url_for('trademark.query_trademarks'))
+
     # Clean and save to database if valid
     if trademark_name:
         trademark_name = trademark_name.strip()
@@ -43,7 +49,7 @@ def register_trademark():
 
 @trademark_blueprint.route('/update_trademark/<int:IdMarca>', methods=['POST'])
 def update_trademark(IdMarca):
-    # Buscamos en Postgres usando el ID exacto
+    # We search in Postgres using the exact ID.
     trademark = Marca.query.get_or_404(IdMarca)
     trademark_name = request.form.get('Marca')
     
@@ -51,4 +57,28 @@ def update_trademark(IdMarca):
         trademark.Marca = trademark_name.strip()
         db.session.commit()
         
+    return redirect(url_for('trademark.query_trademarks'))
+
+
+@trademark_blueprint.route('/delete_trademark/<int:IdMarca>', methods=['POST'])
+def delete_trademark(IdMarca):
+    # We are looking for the existing trademark.
+    trademark = Marca.query.get_or_404(IdMarca)
+    
+    # We check the 'producto' table for dependencies.
+    linked_product = Producto.query.filter_by(IdMarca=IdMarca).count()
+    
+    if linked_product:
+        # If we find at least one product, we stop the deletion.
+        flash("No se puede eliminar la marca porque tiene productos asociados.", "danger")
+        return redirect(url_for('trademark.query_trademarks'))
+    
+    #  If there are no linked products, we proceed to securely delete them
+    try:
+        db.session.delete(trademark)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Ocurrió un error interno al intentar eliminar la marca.", "danger")
+    
     return redirect(url_for('trademark.query_trademarks'))

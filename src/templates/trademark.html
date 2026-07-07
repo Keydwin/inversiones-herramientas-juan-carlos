@@ -73,6 +73,16 @@
         <main class="content">
             <h1 class="page-title">Marcas</h1>
 
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
             <div class="action-bar">
                 <form action="{{ url_for('trademark.query_trademarks') }}" method="GET">
                     <div class="search-container">
@@ -104,6 +114,9 @@
                                 <td class="text-center">
                                     <button class="action-btn edit-btn" onclick="openUpdateModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
                                         <span class="material-symbols-outlined">edit</span>Editar
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
+                                        <span class="material-symbols-outlined">delete</span>Eliminar
                                     </button>
                                 </td>
                             </tr>
@@ -156,13 +169,29 @@
             <h2>Modificar Marca</h2>
             <form id="UpdateTrademarkForm" action="" method="POST">
                 <div class="form-group">
-                    <label for="MarcaModificar">Nombre de la Marca</label>
-                    <input type="text" id="MarcaModificar" name="Marca" placeholder="Modifique el nombre de la marca" required>
+                    <label for="UpdateTrademark">Nombre de la Marca</label>
+                    <input type="text" id="UpdateTrademark" name="Marca" placeholder="Modifique el nombre de la marca" required>
                 </div>
                 
                 <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeUpdateBtn">Cancelar</button>
+                    <button type="button" class="btn-cancel" id="closeUpdateTrademarkBtn">Cancelar</button>
                     <button type="submit" class="btn-modify">Guardar Cambios</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="DeleteTrademarkModal">
+        <div class="modal-card">
+            <h2>Eliminar Marca</h2>
+            <form id="DeleteTrademarkForm" action="" method="POST">
+                <div class="form-group">
+                    <p>¿Está seguro de que desea eliminar la marca <strong id="DeleteTrademark"></strong>?</p>
+                </div>
+                
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeDeleteTrademarkBtn">Cancelar</button>
+                    <button type="submit" class="btn-delete"">Eliminar</button>
                 </div>                
             </form>
         </div>

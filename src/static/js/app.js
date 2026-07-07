@@ -78,8 +78,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-
+    // FLASH
+    const alerts = document.querySelectorAll('.alert');
     
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 500); 
+            
+        }, 3000);
+    });
+
+
+
     // MODAL REGISTRAR
     const openTrademarkModalBtn = document.getElementById('openTrademarkModalBtn');
     const closeTrademarkBtn = document.getElementById('closeTrademarkBtn');
@@ -89,9 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // MODAL MODIFICAR
     const UpdateTrademarkModal = document.getElementById('UpdateTrademarkModal');
-    const closeUpdateBtn = document.getElementById('closeUpdateBtn');
+    const closeUpdateTrademarkBtn = document.getElementById('closeUpdateTrademarkBtn');
     const UpdateTrademarkForm = document.getElementById('UpdateTrademarkForm');
-    const trademarkInputModificar = document.getElementById('MarcaModificar');
+    const UpdateTrademark = document.getElementById('UpdateTrademark');
+
+    // MODAL ELIMINAR
+    const DeleteTrademarkModal = document.getElementById('DeleteTrademarkModal');
+    const closeDeleteTrademarkBtn = document.getElementById('closeDeleteTrademarkBtn');
+    const DeleteTrademarkForm = document.getElementById('DeleteTrademarkForm');
+    const DeleteTrademark = document.getElementById('DeleteTrademark');
     
     // OPEN TRADEMARK MODAL WINDOW
     openTrademarkModalBtn.addEventListener('click', () => {
@@ -105,8 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // CLOSE UPDATE TRADEMARK MODAL WINDOW
-    closeUpdateBtn.addEventListener('click', () => {
+    closeUpdateTrademarkBtn.addEventListener('click', () => {
         UpdateTrademarkModal.classList.remove('active');
+    });
+
+    // CLOSE DELETE TRADEMARK MODAL WINDOW
+    closeDeleteTrademarkBtn.addEventListener('click', () => {
+        DeleteTrademarkModal.classList.remove('active');
     });
 
     if (trademarkInput) {
@@ -118,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (trademarkInput) {
-            trademarkInputModificar.maxLength = 30;
-            trademarkInputModificar.addEventListener('input', (e) => {
+            UpdateTrademark.maxLength = 30;
+            UpdateTrademark.addEventListener('input', (e) => {
 
                 e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]/g, '');
             });
@@ -132,16 +158,34 @@ document.addEventListener('DOMContentLoaded', () => {
 function openUpdateModal(id, nombre) {
     const UpdateTrademarkModal = document.getElementById('UpdateTrademarkModal');
     const UpdateTrademarkForm = document.getElementById('UpdateTrademarkForm');
-    const trademarkInputModificar = document.getElementById('MarcaModificar');
+    const UpdateTrademark = document.getElementById('UpdateTrademark');
 
-    if (UpdateTrademarkModal && UpdateTrademarkForm && trademarkInputModificar) {
+    if (UpdateTrademarkModal && UpdateTrademarkForm && UpdateTrademark) {
         // We set the dynamic Flask URL with IdMarca
         UpdateTrademarkForm.action = `/update_trademark/${id}`;
         
         // We put the current trademark name inside the input
-        trademarkInputModificar.value = nombre;
+        UpdateTrademark.value = nombre;
         
         // We show the update modal using your style
         UpdateTrademarkModal.classList.add('active');
+    }
+}
+
+// GLOBAL FUNCTION TO OPEN DELETE MODAL FROM THE TABLE
+function openDeleteModal(id, nombre) {
+    const DeleteTrademarkModal = document.getElementById('DeleteTrademarkModal');
+    const DeleteTrademarkForm = document.getElementById('DeleteTrademarkForm');
+    const DeleteTrademark = document.getElementById('DeleteTrademark');
+
+    if (DeleteTrademarkModal && DeleteTrademarkForm && DeleteTrademark) {
+        // We set the dynamic Flask URL with IdMarca
+        DeleteTrademarkForm.action = `/delete_trademark/${id}`;
+        
+        // We inject the trademark name into a text label so the user knows what they are deleting
+        DeleteTrademark.textContent = nombre;
+        
+        // We show the delete modal using your style
+        DeleteTrademarkModal.classList.add('active');
     }
 }

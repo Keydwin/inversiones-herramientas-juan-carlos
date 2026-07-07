@@ -5,6 +5,8 @@ from modules.trademark import trademark_blueprint
 
 app = Flask(__name__)
 
+app.secret_key = 'ClaveSuperArrechisimaeñeñe'
+
 # Configuring the PostgreSQL connection
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/SISGE'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
