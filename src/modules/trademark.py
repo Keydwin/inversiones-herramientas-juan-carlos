@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+import io, os
+from flask import Blueprint, render_template, redirect, url_for, request, flash, make_response, current_app
 from models import db, Marca, Producto  
+from xhtml2pdf import pisa
 
 # Create the Blueprint for the branding module
 trademark_blueprint = Blueprint('trademark', __name__)
@@ -8,7 +10,7 @@ trademark_blueprint = Blueprint('trademark', __name__)
 def query_trademarks():
     # Get URL parameters
     page = request.args.get('page', 1, type=int)
-    search_query = request.args.get('q', '', type=str).strip()
+    search_query = request.args.get('trademark', '', type=str).strip()
     
     per_page = 11  # Rows per page
 
@@ -25,7 +27,7 @@ def query_trademarks():
     # Render template with data
     return render_template('trademark.html', pagination=pagination, search_query=search_query)
 
-@trademark_blueprint.route('/register_trademark', methods=['POST'])
+@trademark_blueprint.route('/marcas/register_trademark', methods=['POST'])
 def register_trademark():
     # Get value from form input
     trademark_name = request.form.get('Marca').strip()
@@ -47,7 +49,7 @@ def register_trademark():
     # Redirect back to trademarks list
     return redirect(url_for('trademark.query_trademarks'))
 
-@trademark_blueprint.route('/update_trademark/<int:IdMarca>', methods=['POST'])
+@trademark_blueprint.route('/marcas/update_trademark/<int:IdMarca>', methods=['POST'])
 def update_trademark(IdMarca):
     # We search in Postgres using the exact ID.
     trademark = Marca.query.get_or_404(IdMarca)
@@ -59,8 +61,7 @@ def update_trademark(IdMarca):
         
     return redirect(url_for('trademark.query_trademarks'))
 
-
-@trademark_blueprint.route('/delete_trademark/<int:IdMarca>', methods=['POST'])
+@trademark_blueprint.route('/marcas/delete_trademark/<int:IdMarca>', methods=['POST'])
 def delete_trademark(IdMarca):
     # We are looking for the existing trademark.
     trademark = Marca.query.get_or_404(IdMarca)
@@ -82,3 +83,34 @@ def delete_trademark(IdMarca):
         flash("Ocurrió un error interno al intentar eliminar la marca.", "danger")
     
     return redirect(url_for('trademark.query_trademarks'))
+
+@trademark_blueprint.route('/marcas/reporte-pdf')
+def generar_pdf_marcas():
+    # Get data from PostgreSQL
+    trademark = Marca.query.order_by(Marca.Marca).all()
+    
+    # Obsolute path to the static folder
+    ruta_static = os.path.join(current_app.root_path, 'static')
+    
+    # Render HTML template with data and static path
+    html_renderizado = render_template('pdf_trademark.html', trademark=trademark, base_dir=ruta_static)
+    
+    # Create an in-memory byte buffer
+    output_memoria = io.BytesIO()
+    
+    # Convert HTML to PDF and store it in memory
+    pisa_status = pisa.CreatePDF(html_renderizado, dest=output_memoria)
+    
+    # Check for rendering errors
+    if pisa_status.err:
+        return "Error al generar el PDF", 500
+        
+    # Move pointer to the beginning of the buffer
+    output_memoria.seek(0)
+    
+    # Send PDF file back to the browser as a download
+    response = make_response(output_memoria.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=reporte_marcas.pdf'
+    
+    return response

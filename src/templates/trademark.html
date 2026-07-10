@@ -87,16 +87,16 @@
                 <form action="{{ url_for('trademark.query_trademarks') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="q" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                        <input type="text" name="trademark" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
                     </div>
                 </form>
                 
                 <button class="btn-register" id="openTrademarkModalBtn">Registrar</button>
                 
-                <button class="btn-report">
+                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('trademark.generar_pdf_marcas') }}">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
                     Generar reporte de Marcas
-                </button>
+                </a>
             </div>
 
             <div class="table-responsive">
@@ -131,7 +131,7 @@
 
             <div id="paginationControls" class="pagination-container">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page - 1, q=search_query) }}" class="btn-page">Anterior</a>
+                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page - 1, trademark=search_query) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
@@ -139,7 +139,7 @@
                 <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
 
                 {% if pagination.has_next %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page + 1, q=search_query) }}" class="btn-page">Siguiente</a>
+                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page + 1, trademark=search_query) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}

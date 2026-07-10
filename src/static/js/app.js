@@ -162,7 +162,7 @@ function openUpdateModal(id, nombre) {
 
     if (UpdateTrademarkModal && UpdateTrademarkForm && UpdateTrademark) {
         // We set the dynamic Flask URL with IdMarca
-        UpdateTrademarkForm.action = `/update_trademark/${id}`;
+        UpdateTrademarkForm.action = `/marcas/update_trademark/${id}`;
         
         // We put the current trademark name inside the input
         UpdateTrademark.value = nombre;
@@ -180,7 +180,7 @@ function openDeleteModal(id, nombre) {
 
     if (DeleteTrademarkModal && DeleteTrademarkForm && DeleteTrademark) {
         // We set the dynamic Flask URL with IdMarca
-        DeleteTrademarkForm.action = `/delete_trademark/${id}`;
+        DeleteTrademarkForm.action = `/marcas/delete_trademark/${id}`;
         
         // We inject the trademark name into a text label so the user knows what they are deleting
         DeleteTrademark.textContent = nombre;
