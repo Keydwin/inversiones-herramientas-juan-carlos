@@ -153,9 +153,11 @@
             <form id="TrademarkForm" action="{{ url_for('trademark.register_trademark') }}" method="POST">
                 <div class="form-group">
                     <label for="Marca">Nombre de la Marca</label>
-                    <input type="text" id="Marca" name="Marca" placeholder="Ingrese el nombre de la marca" required>
+                    <input type="text" id="Marca" name="Marca" placeholder="Ingrese el nombre de la marca" data-error="El nombre es obligatorio">
                 </div>
                 
+                <div class="form-error"></div>
+
                 <div class="actions">
                     <button type="button" class="btn-cancel" id="closeTrademarkBtn">Cancelar</button>
                     <button type="submit" class="btn-submit">Registrar</button>
@@ -170,9 +172,9 @@
             <form id="UpdateTrademarkForm" action="" method="POST">
                 <div class="form-group">
                     <label for="UpdateTrademark">Nombre de la Marca</label>
-                    <input type="text" id="UpdateTrademark" name="Marca" placeholder="Modifique el nombre de la marca" required>
+                    <input type="text" id="UpdateTrademark" name="Marca" placeholder="Modifique el nombre de la marca">
                 </div>
-                
+                <div class="form-error"></div>
                 <div class="actions">
                     <button type="button" class="btn-cancel" id="closeUpdateTrademarkBtn">Cancelar</button>
                     <button type="submit" class="btn-modify">Guardar Cambios</button>

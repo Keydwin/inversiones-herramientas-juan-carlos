@@ -35,7 +35,7 @@ def register_trademark():
     # Verify that no trademark with the same name exists.
     existe = Marca.query.filter_by(Marca=trademark_name).first()
     if existe:
-        flash("Esta marca ya se encuentra registrada.", "danger")
+        flash("Esta marca ya se encuentra registrada", "danger")
         return redirect(url_for('trademark.query_trademarks'))
 
     # Clean and save to database if valid
@@ -71,7 +71,7 @@ def delete_trademark(IdMarca):
     
     if linked_product:
         # If we find at least one product, we stop the deletion.
-        flash("No se puede eliminar la marca porque tiene productos asociados.", "danger")
+        flash("No se puede eliminar la marca porque tiene productos asociados", "danger")
         return redirect(url_for('trademark.query_trademarks'))
     
     #  If there are no linked products, we proceed to securely delete them
@@ -80,7 +80,7 @@ def delete_trademark(IdMarca):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        flash("Ocurrió un error interno al intentar eliminar la marca.", "danger")
+        flash("Ocurrió un error interno al intentar eliminar la marca", "danger")
     
     return redirect(url_for('trademark.query_trademarks'))
 

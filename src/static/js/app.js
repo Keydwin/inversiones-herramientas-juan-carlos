@@ -32,52 +32,140 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.toggle('collapsed');
     });
 
-    // GLOBAL VALIDATOR
+
+
+// GLOBAL VALIDATOR 
+    let errorTimeout = null; 
+
     document.addEventListener('submit', (e) => {
-        // Select all form controls
-        const formControls = e.target.querySelectorAll(
+        const currentForm = e.target;
+        const formControls = currentForm.querySelectorAll(
             'input[type="text"], input[type="number"], input:not([type]), textarea, select'
         );
         
         let isFormInvalid = false;
+        const errorSummary = currentForm.querySelector('.form-error');
+
+        // Initial cleanup before re-validation
+        if (errorSummary) {
+            errorSummary.textContent = "";
+            errorSummary.classList.remove('active');
+        }
+        if (errorTimeout) {
+            clearTimeout(errorTimeout); // Cancel any active previous timer
+        }
 
         formControls.forEach(control => {
-            // Check if field is optional
             if (control.classList.contains('opcional')) {
                 control.value = control.value.trim();
                 return;
             }
 
-            // Select elements
+            control.classList.remove('input-error-border');
+
+            // Validations
             if (control.tagName.toLowerCase() === 'select') {
                 if (control.value === '' || control.value === '0') {
                     isFormInvalid = true;
+                    control.classList.add('input-error-border');
                 }
             } 
-            // Number inputs
             else if (control.type === 'number') {
                 if (control.value === '' || parseFloat(control.value) < 0) {
                     isFormInvalid = true;
+                    control.classList.add('input-error-border');
                 }
             } 
-            // Text inputs and textareas
             else {
                 const cleanValue = control.value.trim();
                 if (cleanValue === '') {
                     isFormInvalid = true;
                     control.value = ''; 
+                    control.classList.add('input-error-border');
                 } else {
                     control.value = cleanValue; 
                 }
             }
         });
 
-        // Block submit silently
+        // If the form has errors
         if (isFormInvalid) {
-            e.preventDefault();
+            e.preventDefault(); // Stop the form submission to Flask
+            
+            if (errorSummary) {
+                errorSummary.textContent = "Por favor ingresar los datos en los campos";
+                errorSummary.classList.add('active');
+
+                // --- TIMER ---
+                errorTimeout = setTimeout(() => {
+                    errorSummary.classList.remove('active');
+                    
+                    // Wait for the close animation (250ms) to clear the text
+                    setTimeout(() => {
+                        if (!errorSummary.classList.contains('active')) {
+                            errorSummary.textContent = ""; 
+                        }
+                    }, 250);
+
+                    // Remove red borders when the error message fades out
+                    formControls.forEach(c => c.classList.remove('input-error-border'));
+                }, 4000); 
+            }
+        }
+    });
+
+    // INTERACTIVE CLEANUP ON TYPE
+    document.addEventListener('input', (e) => {
+        const control = e.target;
+        control.classList.remove('input-error-border');
+        
+        const currentForm = control.closest('form');
+        if (currentForm) {
+            const errorSummary = currentForm.querySelector('.form-error');
+            if (errorSummary) {
+                errorSummary.classList.remove('active');
+                
+                // Clear text after interactive close
+                setTimeout(() => {
+                    if (!errorSummary.classList.contains('active')) {
+                        errorSummary.textContent = ""; 
+                    }
+                }, 250);
+            }
+        }
+        if (errorTimeout) {
+            clearTimeout(errorTimeout);
         }
     });
     
+    document.addEventListener('click', (e) => {
+            // Check if the click was on a cancel button
+            const cancelBtn = e.target.closest('.btn-cancel');
+            
+            if (cancelBtn) {
+                // Find the parent modal to get the form
+                const modal = cancelBtn.closest('.modal-overlay');
+                if (modal) {
+                    const form = modal.querySelector('form');
+                    if (form) {
+                        // Clean and hide the error text container
+                        const errorSummary = form.querySelector('.form-error');
+                        if (errorSummary) {
+                            errorSummary.textContent = "";
+                            errorSummary.classList.remove('active');
+                        }
+                        
+                        // Remove all red borders from inputs, textareas, and selects
+                        const inputs = form.querySelectorAll('input, textarea, select');
+                        inputs.forEach(input => {
+                            input.classList.remove('input-error-border');
+                        });
+                    }
+                }
+            }
+        });
+
+
     // FLASH
     const alerts = document.querySelectorAll('.alert');
     
@@ -90,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert.remove();
             }, 500); 
             
-        }, 3000);
+        }, 2000);
     });
 
 
