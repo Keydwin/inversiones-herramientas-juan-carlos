@@ -84,8 +84,8 @@ def delete_trademark(IdMarca):
     
     return redirect(url_for('trademark.query_trademarks'))
 
-@trademark_blueprint.route('/marcas/reporte-pdf')
-def generar_pdf_marcas():
+@trademark_blueprint.route('/marcas/trademark_report')
+def generate_trademark_report():
     # Get data from PostgreSQL
     trademark = Marca.query.order_by(Marca.Marca).all()
     

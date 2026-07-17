@@ -82,7 +82,7 @@
 
                 <button class="btn-register" id="openProductModalBtn">Registrar</button>
                 
-                <a class="btn-report" id="btnGenerarPdf" href="#">
+                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('product.generate_product_report') }}">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
                     Generar reporte de Productos
                 </a>
