@@ -69,60 +69,60 @@
                 <a href="#" class="menu-item"><span class="material-symbols-outlined">account_circle</span> Usuarios</a>
             </nav>
         </aside>
-
         <main class="content">
-            <h1 class="page-title">Marcas</h1>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        <span>{{ message }}</span>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+            <h1 class="page-title">Productos</h1>
 
             <div class="action-bar">
-                <form action="{{ url_for('trademark.query_trademarks') }}" method="GET">
+                <form action="{{ url_for('product.query_products') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="trademark" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                        <input type="text" name="product" placeholder="Ingresar Producto para la búsqueda" class="opcional" value="{{ search_query or '' }}">
                     </div>
                 </form>
+
+                <button class="btn-register" id="openProductModalBtn">Registrar</button>
                 
-                <button class="btn-register" id="openTrademarkModalBtn">Registrar</button>
-                
-                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('trademark.generar_pdf_marcas') }}">
+                <a class="btn-report" id="btnGenerarPdf" href="#">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
-                    Generar reporte de Marcas
+                    Generar reporte de Productos
                 </a>
+
             </div>
 
             <div class="table-responsive">
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Descripción</th>
                             <th>Marca</th>
+                            <th>Precio Contado</th>
+                            <th>Precio Crédito</th>
                             <th class="text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for trademark in pagination.items %}
+                        {% for product in pagination.items %}
                             <tr>
-                                <td data-buscar="nombre">{{ trademark.Marca|trim }}</td>
+                                <td>{{ product.Codigo|trim }}</td>
+                                <td data-buscar="nombre">{{ product.NombreProducto|trim }}</td>
+                                <td>{{ product.Descripcion|trim }}</td>
+                                <td>{{ product.marca.Marca|trim }}</td>
+                                <td>{{ "%.2f"|format(product.PrecioDeContado|float) }}</td>
+                                <td>{{ "%.2f"|format(product.PrecioCredito|float) }}</td>
                                 <td class="text-center">
-                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
+                                    <button class="action-btn edit-btn">
                                         <span class="material-symbols-outlined">edit</span>Editar
                                     </button>
-                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
+                                    <button class="action-btn delete-btn">
                                         <span class="material-symbols-outlined">delete</span>Eliminar
                                     </button>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="2" class="text-center">No se encontraron marcas registradas</td>
+                                <td colspan="7" class="text-center">No se encontraron productos registrados</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -131,7 +131,7 @@
 
             <div class="pagination-container">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page - 1, trademark=search_query) }}" class="btn-page">Anterior</a>
+                    <a href="{{ url_for('product.query_products', page=pagination.page - 1, product=search_query) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
@@ -139,65 +139,10 @@
                 <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
 
                 {% if pagination.has_next %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page + 1, trademark=search_query) }}" class="btn-page">Siguiente</a>
+                    <a href="{{ url_for('product.query_products', page=pagination.page + 1, product=search_query) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}
             </div>
         </main>
     </div>
-
-    <div class="modal-overlay" id="TrademarkModal">
-        <div class="modal-card">
-            <h2>Registro de Marca</h2>
-            <form id="TrademarkForm" action="{{ url_for('trademark.register_trademark') }}" method="POST">
-                <div class="form-group">
-                    <label for="Marca">Nombre de la Marca</label>
-                    <input type="text" id="Marca" name="Marca" placeholder="Ingrese el nombre de la marca" data-error="El nombre es obligatorio">
-                </div>
-                
-                <div class="form-error"></div>
-
-                <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeTrademarkBtn">Cancelar</button>
-                    <button type="submit" class="btn-submit">Registrar</button>
-                </div>                
-            </form>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="UpdateTrademarkModal">
-        <div class="modal-card">
-            <h2>Modificar Marca</h2>
-            <form id="UpdateTrademarkForm" action="" method="POST">
-                <div class="form-group">
-                    <label for="UpdateTrademark">Nombre de la Marca</label>
-                    <input type="text" id="UpdateTrademark" name="Marca" placeholder="Modifique el nombre de la marca">
-                </div>
-                <div class="form-error"></div>
-                <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeUpdateTrademarkBtn">Cancelar</button>
-                    <button type="submit" class="btn-modify">Guardar Cambios</button>
-                </div>                
-            </form>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="DeleteTrademarkModal">
-        <div class="modal-card">
-            <h2>Eliminar Marca</h2>
-            <form id="DeleteTrademarkForm" action="" method="POST">
-                <div class="form-group">
-                    <p>¿Está seguro de que desea eliminar la marca <strong id="DeleteTrademark"></strong>?</p>
-                </div>
-                
-                <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeDeleteTrademarkBtn">Cancelar</button>
-                    <button type="submit" class="btn-delete"">Eliminar</button>
-                </div>                
-            </form>
-        </div>
-    </div>
-
-</body>
-</html>
