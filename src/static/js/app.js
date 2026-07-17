@@ -93,10 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault(); // Stop the form submission to Flask
             
             if (errorSummary) {
-                errorSummary.textContent = "Por favor ingresar los datos en los campos";
+                errorSummary.textContent = "Por favor ingrese todos los datos solicitados";
                 errorSummary.classList.add('active');
 
-                // --- TIMER ---
+                // TIMER 
                 errorTimeout = setTimeout(() => {
                     errorSummary.classList.remove('active');
                     
