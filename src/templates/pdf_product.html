@@ -20,9 +20,11 @@
             <tr>
                 <th>Codigo</th>
                 <th>Producto</th>
-                <th>Descripción</th>
-                <th width="110">Marca</th>
+                <th style="width: 290px;">Descripción</th>
+                <th>Marca</th>
+                <th>Porcentaje de Contado</th>
                 <th>Precio contado</th>
+                <th>Porcentaje de Credito</th>
                 <th>Precio credito</th>
             </tr>
         </thead>
@@ -37,7 +39,9 @@
                             {{ product.marca.Marca.strip() }}
                         {% endif %}
                     </td>
+                    <td>{{ product.PorcenajeDeContado|trim }}</td>
                     <td>{{ "%.2f"|format(product.PrecioDeContado|float) }}</td>
+                    <td>{{ product.PorcentajeCredito|trim }}</td>
                     <td>{{ "%.2f"|format(product.PrecioCredito|float) }}</td>
                 </tr>
             {% endfor %}

@@ -83,6 +83,8 @@ class Producto(db.Model):
     Descripcion = db.Column(db.String(255), nullable=False)
     PrecioDeContado = db.Column(db.Numeric(10, 2), nullable=False)
     PrecioCredito = db.Column(db.Numeric(10, 2), nullable=False)
+    PorcenajeDeContado = db.Column(db.Integer, nullable=False)
+    PorcentajeCredito = db.Column(db.Integer, nullable=False)
 
     marca = db.relationship('Marca')
 
@@ -155,15 +157,3 @@ class Venta(db.Model):
 
     trabajador = db.relationship('Trabajador')
     cliente = db.relationship('Cliente')
-
-
-
-
-
-
-
-
-
-
-
-
