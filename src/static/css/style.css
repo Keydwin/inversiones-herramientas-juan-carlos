@@ -330,11 +330,6 @@ body {
     border-bottom: none; 
 }
 
-.text-center { 
-    text-align: center; 
-}
-
-
 .action-btn {
     display: inline-flex;
     align-items: center;
@@ -524,7 +519,11 @@ body {
     border-top: 6px solid var(--primary-teal);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     padding: 32px;
+    max-height: 85vh; 
+    overflow-y: auto;       
+    box-sizing: border-box;
     animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
 }
 
 @keyframes slideUp {
@@ -555,7 +554,7 @@ body {
     color: #475569;
 }
 
-.form-group input, .form-group textarea {
+.form-group input, .form-group textarea, .form-group select {
     width: 100%; 
     padding: 10px 14px;
     border: 1px solid var(--border-color);

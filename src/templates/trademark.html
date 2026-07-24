@@ -115,7 +115,7 @@
                                     <button class="action-btn edit-btn" onclick="openUpdateModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
                                         <span class="material-symbols-outlined">edit</span>Editar
                                     </button>
-                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
+                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ trademark.IdMarca }}')">
                                         <span class="material-symbols-outlined">delete</span>Eliminar
                                     </button>
                                 </td>
@@ -188,7 +188,7 @@
             <h2>Eliminar Marca</h2>
             <form id="DeleteTrademarkForm" action="" method="POST">
                 <div class="form-group">
-                    <p>¿Está seguro de que desea eliminar la marca <strong id="DeleteTrademark"></strong>?</p>
+                    <p>¿Está seguro de que desea eliminar la marca?</p>
                 </div>
                 
                 <div class="actions">
