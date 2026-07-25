@@ -66,9 +66,51 @@ def register_product():
         
     except Exception as e:
         db.session.rollback()
-        flash(f'Error al registrar el producto', 'danger')
+        flash(f'Error al registrar el producto: {str(e)}', 'danger')
         
     # Standard clean redirect to dynamic data list
+    return redirect(url_for('product.query_products'))
+
+@product_blueprint.route('/productos/modificar/<int:IdProducto>', methods=['POST'])
+def update_product(IdProducto):
+    try:
+        # Search for the existing product in the database
+        ExistingProduct = Producto.query.get_or_404(IdProducto)
+        
+        # Extract the data from the edit form
+        Codigo = request.form.get('Codigo').strip()
+        NombreProducto = request.form.get('NombreProducto').strip()
+        Descripcion = request.form.get('Descripcion').strip()
+        IdMarca = request.form.get('IdMarca').strip()
+        PrecioDeContado = request.form.get('PrecioDeContado').strip()
+        PrecioCredito = request.form.get('PrecioCredito').strip()
+        PorcenajeDeContado = request.form.get('PorcenajeDeContado').strip()
+        PorcentajeCredito = request.form.get('PorcentajeCredito').strip()
+
+        # Validate code duplicates (only if the code has changed)
+        if int(Codigo) != ExistingProduct.Codigo:
+            duplicate_check = Producto.query.filter_by(Codigo=int(Codigo)).first()
+            if duplicate_check:
+                flash('El nuevo código de producto ya está registrado por otro artículo.', 'danger')
+                return redirect(url_for('product.query_products'))
+
+        #  Update the attributes of the mapped object.
+        ExistingProduct.Codigo = Codigo
+        ExistingProduct.NombreProducto = NombreProducto
+        ExistingProduct.Descripcion = Descripcion
+        ExistingProduct.IdMarca = IdMarca
+        ExistingProduct.PrecioDeContado = PrecioDeContado
+        ExistingProduct.PrecioCredito = PrecioCredito
+        ExistingProduct.PorcenajeDeContado = PorcenajeDeContado
+        ExistingProduct.PorcentajeCredito = PorcentajeCredito
+
+        # Guardar los cambios en PostgreSQL
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al modificar el producto: {str(e)}', 'error')
+
     return redirect(url_for('product.query_products'))
 
 @product_blueprint.route('/productos/product_report')
