@@ -86,7 +86,7 @@
                 <form action="{{ url_for('product.query_products') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="product" placeholder="Ingresar codigo o producto para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                        <input type="text" name="product" placeholder="Ingresar producto para la búsqueda" class="opcional" value="{{ search_query or '' }}">
                     </div>
                 </form>
 
@@ -126,7 +126,16 @@
                                 <td>{{ product.PorcentajeCredito|trim }}</td>
                                 <td>{{ "%.2f"|format(product.PrecioCredito|float) }}</td>
                                 <td>
-                                    <button class="action-btn edit-btn">
+                                    <button class="action-btn edit-btn" onclick="OpenProductUpdateModal(
+                                        '{{ product.IdProducto }}', 
+                                        '{{ product.Codigo }}', 
+                                        '{{ product.NombreProducto|trim }}', 
+                                        '{{ product.Descripcion|trim }}', 
+                                        '{{ product.IdMarca }}', 
+                                        '{{ product.PorcenajeDeContado }}', 
+                                        '{{ product.PrecioDeContado }}', 
+                                        '{{ product.PorcentajeCredito }}', 
+                                        '{{ product.PrecioCredito }}')">
                                         <span class="material-symbols-outlined">edit</span>Editar
                                     </button>
                                     <button class="action-btn delete-btn">
@@ -221,6 +230,69 @@
             </form>
         </div>
     </div>
+
+
+    <div class="modal-overlay" id="EditProductModal" >
+    <div class="modal-card">
+        <h2>Modificar Producto</h2>
+        <form id="EditProductForm" action="" method="POST">
+            
+            <div class="form-group">
+                <label for="CodigoEdicion">Código del Producto</label>
+                <input type="text" id="CodigoEdicion" name="Codigo" placeholder="Ingrese el código numérico">
+            </div>
+
+            <div class="form-group">
+                <label for="NombreProductoEdicion">Nombre del Producto</label>
+                <input type="text" id="NombreProductoEdicion" name="NombreProducto" placeholder="Ingrese el nombre del producto">
+            </div>
+
+            <div class="form-group">
+                <label for="DescripcionEdicion">Descripción</label>
+                <textarea id="DescripcionEdicion" name="Descripcion" rows="3" placeholder="Ingrese una descripción del producto"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="IdMarcaEdicion">Marca Asociada</label>
+                <select id="IdMarcaEdicion" name="IdMarca">
+                    <option value="">Seleccionar Marca</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand.IdMarca }}">{{ brand.Marca }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="PorcenajeDeContadoEdicion">Porcentaje de Contado</label>
+                <input type="number" id="PorcenajeDeContadoEdicion" name="PorcenajeDeContado" placeholder="Ingrese el numero de porcentaje">
+            </div>
+
+            <div class="form-group">
+                <label for="PrecioDeContadoEdicion">Precio de Contado</label>
+                <input type="number" id="PrecioDeContadoEdicion" name="PrecioDeContado" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="form-group">
+                <label for="PorcentajeCreditoEdicion">Porcentaje de Crédito</label>
+                <input type="number" id="PorcentajeCreditoEdicion" name="PorcentajeCredito" placeholder="Ingrese el numero de porcentaje">
+            </div>
+
+            <div class="form-group">
+                <label for="PrecioCreditoEdicion">Precio de Crédito</label>
+                <input type="number" id="PrecioCreditoEdicion" name="PrecioCredito" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="form-error"></div>
+
+            <div class="actions">
+                <button type="button" class="btn-cancel" id="closeEditProductBtn">Cancelar</button>
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+            </div>                
+        </form>
+    </div>
+</div>
+
+
 </body>
 
 </html>

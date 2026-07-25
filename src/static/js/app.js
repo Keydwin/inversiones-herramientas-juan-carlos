@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Description input 
     const inputDescripcion = document.getElementById('Descripcion');
     if (inputDescripcion) {
-        inputDescripcion.maxLength = 50;
+        inputDescripcion.maxLength = 40;
         inputDescripcion.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 .,()-]/g, '');
         });
@@ -232,6 +232,106 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inputPrecioCredito) {
         inputPrecioCredito.maxLength = 10;
         inputPrecioCredito.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            e.target.value = value;
+        });
+    }
+
+
+
+    const editModal = document.getElementById('EditProductModal');
+    const closeEditProductBtn = document.getElementById('closeEditProductBtn');
+
+    if (closeEditProductBtn && editModal) {
+        closeEditProductBtn.addEventListener('click', () => {
+            // Si usas clases CSS para controlar los modales:
+            editModal.classList.remove('active');
+            // Si usas display directo en línea:
+            editModal.style.display = 'none';
+        });
+    }
+
+
+    // Disable autocomplete on the Edit Form
+    const editForm = document.getElementById('EditProductForm');
+    if (editForm) editForm.setAttribute('autocomplete', 'off');
+
+    // Code input
+    const editCodigo = document.getElementById('CodigoEdicion');
+    if (editCodigo) {
+        editCodigo.maxLength = 10;
+        editCodigo.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Product Name input 
+    const editNombre = document.getElementById('NombreProductoEdicion');
+    if (editNombre) {
+        editNombre.maxLength = 50;
+        editNombre.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 ]/g, '');
+        });
+    }
+
+    // Description input 
+    const editDescripcion = document.getElementById('DescripcionEdicion');
+    if (editDescripcion) {
+        editDescripcion.maxLength = 40;
+        editDescripcion.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 .,()-]/g, '');
+        });
+    }
+
+    // Brand ID input 
+    const editIdMarca = document.getElementById('IdMarcaEdicion');
+    if (editIdMarca) {
+        editIdMarca.maxLength = 10;
+        editIdMarca.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Cash Percentage input 
+    const editPorcentajeContado = document.getElementById('PorcenajeDeContadoEdicion');
+    if (editPorcentajeContado) {
+        editPorcentajeContado.maxLength = 3;
+        editPorcentajeContado.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Credit Percentage input 
+    const editPorcentajeCredito = document.getElementById('PorcentajeCreditoEdicion');
+    if (editPorcentajeCredito) {
+        editPorcentajeCredito.maxLength = 3;
+        editPorcentajeCredito.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Cash Price input 
+    const editPrecioContado = document.getElementById('PrecioDeContadoEdicion');
+    if (editPrecioContado) {
+        editPrecioContado.maxLength = 10;
+        editPrecioContado.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            e.target.value = value;
+        });
+    }
+
+    const editPrecioCredito = document.getElementById('PrecioCreditoEdicion');
+    if (editPrecioCredito) {
+        editPrecioCredito.maxLength = 10;
+        editPrecioCredito.addEventListener('input', (e) => {
             let value = e.target.value.replace(/[^0-9.]/g, '');
             const parts = value.split('.');
             if (parts.length > 2) {
@@ -296,4 +396,29 @@ function openDeleteModal(id) {
         DeleteTrademarkModal.classList.add('active');   
     }
     closeDeleteTrademarkBtn.addEventListener('click', () => DeleteTrademarkModal.classList.remove('active'));
+}
+
+
+function OpenProductUpdateModal(id, codigo, nombre, descripcion, idMarca, pctContado, precioContado, pctCredito, precioCredito) {
+    const editForm = document.getElementById('EditProductForm');
+    const editModal = document.getElementById('EditProductModal');
+
+    if (editForm) {
+        editForm.action = `/productos/modificar/${id}`;
+    }
+
+    if (document.getElementById('CodigoEdicion')) document.getElementById('CodigoEdicion').value = codigo;
+    if (document.getElementById('NombreProductoEdicion')) document.getElementById('NombreProductoEdicion').value = nombre;
+    if (document.getElementById('DescripcionEdicion')) document.getElementById('DescripcionEdicion').value = descripcion;
+    if (document.getElementById('IdMarcaEdicion')) document.getElementById('IdMarcaEdicion').value = idMarca;
+    if (document.getElementById('PorcenajeDeContadoEdicion')) document.getElementById('PorcenajeDeContadoEdicion').value = pctContado;
+    if (document.getElementById('PrecioDeContadoEdicion')) document.getElementById('PrecioDeContadoEdicion').value = precioContado;
+    if (document.getElementById('PorcentajeCreditoEdicion')) document.getElementById('PorcentajeCreditoEdicion').value = pctCredito;
+    if (document.getElementById('PrecioCreditoEdicion')) document.getElementById('PrecioCreditoEdicion').value = precioCredito;
+
+    if (editModal) {
+        editModal.classList.add('active');
+        editModal.style.display = 'flex';
+    }
+
 }
