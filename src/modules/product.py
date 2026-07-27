@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, make_response, current_app, flash, redirect, url_for
 from models import db, Producto, Marca
 from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import IntegrityError
 import io, os
 from xhtml2pdf import pisa
 
@@ -110,6 +111,23 @@ def update_product(IdProducto):
     except Exception as e:
         db.session.rollback()
         flash(f'Error al modificar el producto: {str(e)}', 'error')
+
+    return redirect(url_for('product.query_products'))
+
+@product_blueprint.route('/productos/eliminar/<int:IdProducto>', methods=['POST'])
+def delete_product(IdProducto):
+    try:
+        producto = Producto.query.get_or_404(IdProducto)
+        db.session.delete(producto)
+        db.session.commit()
+        
+    except IntegrityError:
+        db.session.rollback()
+        flash('No se puede eliminar este producto porque está asociado ya sea a una compra o venta o inventario', 'danger')
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al intentar eliminar el producto', 'danger')
 
     return redirect(url_for('product.query_products'))
 

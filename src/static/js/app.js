@@ -248,9 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (closeEditProductBtn && editModal) {
         closeEditProductBtn.addEventListener('click', () => {
-            // Si usas clases CSS para controlar los modales:
+
             editModal.classList.remove('active');
-            // Si usas display directo en línea:
             editModal.style.display = 'none';
         });
     }
@@ -342,6 +341,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    const deleteModal = document.getElementById('DeleteProductModal');
+    const closeDeleteBtn = document.getElementById('closeDeleteProductBtn');
+
+    if (closeDeleteBtn && deleteModal) {
+        closeDeleteBtn.addEventListener('click', () => {
+
+            deleteModal.classList.remove('active'); 
+        });
+    }
+
+
     const openTrademarkModalBtn = document.getElementById('openTrademarkModalBtn');
     const TrademarkModal = document.getElementById('TrademarkModal');
     const closeTrademarkBtn = document.getElementById('closeTrademarkBtn');
@@ -421,4 +431,19 @@ function OpenProductUpdateModal(id, codigo, nombre, descripcion, idMarca, pctCon
         editModal.style.display = 'flex';
     }
 
+}
+
+
+
+function OpenProductDeleteModal(id, nombre) {
+    const deleteForm = document.getElementById('DeleteProductForm');
+    const deleteModal = document.getElementById('DeleteProductModal');
+
+    if (deleteForm) {
+        deleteForm.action = `/productos/eliminar/${id}`;
+    }
+
+    if (deleteModal) {
+        deleteModal.classList.add('active');
+    }
 }
