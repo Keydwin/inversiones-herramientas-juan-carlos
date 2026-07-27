@@ -138,14 +138,10 @@
                                         '{{ product.PrecioCredito }}')">
                                         <span class="material-symbols-outlined">edit</span>Editar
                                     </button>
-                                    <button class="action-btn delete-btn">
+                                    <button class="action-btn delete-btn" onclick="OpenProductDeleteModal('{{ product.IdProducto }}')">
                                         <span class="material-symbols-outlined">delete</span>Eliminar
                                     </button>
                                 </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="7" class="text-center">No se encontraron productos registrados</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -291,6 +287,23 @@
         </form>
     </div>
 </div>
+
+
+
+<div class="modal-overlay" id="DeleteProductModal">
+        <div class="modal-card">
+            <h2>Eliminar Producto</h2>
+            <form id="DeleteProductForm" action="" method="POST">
+                <div class="form-group">
+                    <p>¿Está seguro de que desea eliminar el producto?</p>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeDeleteProductBtn">Cancelar</button>
+                    <button type="submit" class="btn-delete"">Eliminar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
 
 
 </body>

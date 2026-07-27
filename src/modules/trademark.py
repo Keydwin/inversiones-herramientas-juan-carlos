@@ -1,6 +1,7 @@
 import io, os
 from flask import Blueprint, render_template, redirect, url_for, request, flash, make_response, current_app
 from models import db, Marca, Producto  
+from sqlalchemy.exc import IntegrityError
 from xhtml2pdf import pisa
 
 # Create the Blueprint for the branding module
@@ -63,24 +64,18 @@ def update_trademark(IdMarca):
 
 @trademark_blueprint.route('/marcas/delete_trademark/<int:IdMarca>', methods=['POST'])
 def delete_trademark(IdMarca):
-    # We are looking for the existing trademark.
-    trademark = Marca.query.get_or_404(IdMarca)
-    
-    # We check the 'producto' table for dependencies.
-    linked_product = Producto.query.filter_by(IdMarca=IdMarca).count()
-    
-    if linked_product:
-        # If we find at least one product, we stop the deletion.
-        flash("No se puede eliminar la marca porque tiene productos asociados", "danger")
-        return redirect(url_for('trademark.query_trademarks'))
-    
-    #  If there are no linked products, we proceed to securely delete them
     try:
-        db.session.delete(trademark)
+        producto = Producto.query.get_or_404(IdMarca)
+        db.session.delete(producto)
         db.session.commit()
+        
+    except IntegrityError:
+        db.session.rollback()
+        flash('No se puede eliminar la marca porque tiene productos asociados', 'danger')
+        
     except Exception as e:
         db.session.rollback()
-        flash("Ocurrió un error interno al intentar eliminar la marca", "danger")
+        flash(f'Error al intentar eliminar la marca', 'danger')
     
     return redirect(url_for('trademark.query_trademarks'))
 
