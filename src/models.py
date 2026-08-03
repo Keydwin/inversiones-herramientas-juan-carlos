@@ -22,6 +22,8 @@ class Compra(db.Model):
     IdProveedor = db.Column(db.Integer, db.ForeignKey('proveedor.IdProveedor'), nullable=False)
     Fecha = db.Column(db.Date, nullable=False)
     MontoTotal = db.Column(db.Numeric(10, 2), nullable=False)
+    
+    productocompra = db.relationship('ProductoCompra', back_populates='compra')
 
     proveedor = db.relationship('Proveedor')
 
@@ -99,7 +101,7 @@ class ProductoCompra(db.Model):
     PrecioCredito = db.Column(db.Numeric(10, 2), nullable=False)
 
     producto = db.relationship('Producto')
-    compra = db.relationship('Compra')
+    compra = db.relationship('Compra', back_populates='productocompra')
 
 class ProductoVenta(db.Model):
     __tablename__ = 'productoventa'

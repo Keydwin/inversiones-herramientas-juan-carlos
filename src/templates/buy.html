@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buy.js') }}"></script>
 </head>
 <body>
     <header class="topbar">
@@ -71,7 +72,7 @@
         </aside>
 
         <main class="content">
-            <h1 class="page-title">Marcas</h1>
+            <h1 class="page-title">Compras</h1>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -83,46 +84,54 @@
                 {% endif %}
             {% endwith %}
 
-            <div class="action-bar">
-                <form action="{{ url_for('trademark.query_trademarks') }}" method="GET">
-                    <div class="search-container">
-                        <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="trademark" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
-                    </div>
-                </form>
-                
-                <button class="btn-register" id="openTrademarkModalBtn">Registrar</button>
-                
-                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('trademark.generate_trademark_report') }}">
-                    <span class="material-symbols-outlined">picture_as_pdf</span>
-                    Generar reporte de Marcas
-                </a>
-            </div>
+    <div class="action-bar">
+    <form action="" method="GET" style="display: flex; gap: 10px; align-items: center;">
+        
+        <div class="search-container">
+            <span class="material-symbols-outlined search-icon">calendar_today</span>
+            <input type="date" name="start_date" class="opcional" value="{{ start_date }}" title="Fecha Desde">
+        </div>
 
+        <div class="search-container">
+            <span class="material-symbols-outlined search-icon">calendar_today</span>
+            <input type="date" name="end_date" class="opcional" value="{{ end_date }}" title="Fecha Hasta">
+        </div>
+
+        <button type="submit" style="display: none;"></button>
+    </form>
+    
+    <button class="btn-register" id="openTrademarkModalBtn">Registrar</button>
+
+    <a class="btn-report" id="btnGenerarPdf" href="#">
+        <span class="material-symbols-outlined">picture_as_pdf</span>
+        Generar reporte de Compras
+    </a>
+    </div>
             <div class="table-responsive">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Marca</th>
-                            <th class="text-center">Acción</th>
+                            <th>Fecha</th>
+                            <th>Proveedor</th>
+                            <th>Monto Total</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for trademark in pagination.items %}
-                            <tr>
-                                <td data-buscar="nombre">{{ trademark.Marca|trim }}</td>
-                                <td class="text-center">
-                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
-                                        <span class="material-symbols-outlined">edit</span>Editar
-                                    </button>
-                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ trademark.IdMarca }}')">
-                                        <span class="material-symbols-outlined">delete</span>Eliminar
-                                    </button>
-                                </td>
-                            </tr>
+                       {% for compra in pagination.items %}
+                        <tr>
+                            <td>{{ compra.Fecha.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ compra.proveedor.NombreProveedor }}</td>
+                            <td>{{ compra.MontoTotal }}</td>
+                            <td>
+                                <button type="button" class="action-btn details-btn" onclick="abrirModalDetalle('{{ compra.IdCompra }}')">
+                                    <span class="material-symbols-outlined">info</span> Ver Detalle
+                                </button>
+                            </td>
+                        </tr>
                         {% else %}
                             <tr>
-                                <td colspan="1" class="text-center">No se encontraron marcas registradas</td>
+                                <td colspan="4" class="text-center">No se encontraron compras realizadas en dichas fechas establecidas</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -131,7 +140,7 @@
 
             <div class="pagination-container">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page - 1, trademark=search_query) }}" class="btn-page">Anterior</a>
+                    <a href="{{ url_for('buy.query_purchases', page=pagination.page - 1, supplier=search_query) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
@@ -139,7 +148,7 @@
                 <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
 
                 {% if pagination.has_next %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page + 1, trademark=search_query) }}" class="btn-page">Siguiente</a>
+                    <a href="{{ url_for('buy.query_purchases', page=pagination.page + 1, supplier=search_query) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}
@@ -147,57 +156,62 @@
         </main>
     </div>
 
-    <div class="modal-overlay" id="TrademarkModal">
-        <div class="modal-card">
-            <h2>Registro de Marca</h2>
-            <form id="TrademarkForm" action="{{ url_for('trademark.register_trademark') }}" method="POST">
-                <div class="form-group">
-                    <label for="Marca">Nombre de la Marca</label>
-                    <input type="text" id="Marca" name="Marca" placeholder="Ingrese el nombre de la marca" data-error="El nombre es obligatorio">
-                </div>
-                
-                <div class="form-error"></div>
+{% for compra in pagination.items %}
 
-                <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeTrademarkBtn">Cancelar</button>
-                    <button type="submit" class="btn-submit">Registrar</button>
-                </div>                
-            </form>
+<div class="modal-overlay" id="modalDetalle{{ compra.IdCompra }}">
+    
+    <div class="contenedor-detalle-compra">
+        
+        <h2>Detalle de Compra</h2>
+        
+        <div class="detail-group-info">
+            <label>Proveedor</label>
+            <input type="text" value="{{ compra.proveedor.NombreProveedor }}" readonly>
+        </div>
+        
+        <div class="detail-group-info">
+            <label>Fecha de la Compra</label>
+            <input type="text" value="{{ compra.Fecha.strftime('%d/%m/%Y') }}" readonly>
+        </div>
+        
+        <div class="detail-table-container">
+            <table class="tabla-detalle">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cant.</th>
+                        <th>Precio Contado</th>
+                        <th>Precio Crédito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in compra.productocompra %}
+                    <tr>
+                        <td class="detail-product-name">{{ detalle.producto.NombreProducto }}</td>
+                        <td>{{ detalle.Cantidad }}</td>
+                        <td>${{ "%.2f"|format(detalle.PrecioDecontado) }}</td>
+                        <td>${{ "%.2f"|format(detalle.PrecioCredito) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detail-total-box">
+            <span class="detail-total-label">Monto Total:</span>
+            <span class="detail-total-amount">${{ "%.2f"|format(compra.MontoTotal) }}</span>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn-cancel" onclick="cerrarModalDetalle('{{ compra.IdCompra }}')">Cerrar Ventana</button>
         </div>
     </div>
+</div>
+{% endfor %}
 
-    <div class="modal-overlay" id="UpdateTrademarkModal">
-        <div class="modal-card">
-            <h2>Modificar Marca</h2>
-            <form id="UpdateTrademarkForm" action="" method="POST">
-                <div class="form-group">
-                    <label for="UpdateTrademark">Nombre de la Marca</label>
-                    <input type="text" id="UpdateTrademark" name="Marca" placeholder="Modifique el nombre de la marca">
-                </div>
-                <div class="form-error"></div>
-                <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeUpdateTrademarkBtn">Cancelar</button>
-                    <button type="submit" class="btn-modify">Guardar Cambios</button>
-                </div>                
-            </form>
-        </div>
-    </div>
 
-    <div class="modal-overlay" id="DeleteTrademarkModal">
-        <div class="modal-card">
-            <h2>Eliminar Marca</h2>
-            <form id="DeleteTrademarkForm" action="" method="POST">
-                <div class="form-group">
-                    <p>¿Está seguro de que desea eliminar la marca?</p>
-                </div>
-                
-                <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeDeleteTrademarkBtn">Cancelar</button>
-                    <button type="submit" class="btn-delete"">Eliminar</button>
-                </div>                
-            </form>
-        </div>
-    </div>
+
+
 
 </body>
 </html>
