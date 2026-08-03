@@ -83,9 +83,9 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
     box-shadow: 4px 0 20px rgba(15, 23, 42, 0.02);
+    border-radius: 0px 12px 12px 0px;
     position: absolute;
     z-index: 50;
-    border-radius: 0px 12px 12px 0px;
 }
 
 .sidebar.collapsed {
@@ -736,6 +736,134 @@ body {
     transition: all 0.25s ease-in-out;
 }
 
+.contenedor-detalle-compra {
+    background-color: white;
+    width: 90%;
+    max-width: 850px; 
+    min-width: 320px;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-top: 6px solid var(--primary-dark-teal);
+    animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-sizing: border-box;
+}
+
+/* Título interno */
+.contenedor-detalle-compra h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--text-dark);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.detail-group-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.detail-group-info label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-group-info input[readonly] {
+    background-color: #f8fafc;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+    cursor: default;
+}
+
+/* Contenedor de la tabla con scroll vertical */
+.detail-table-container {
+    margin-top: 24px;
+    margin-bottom: 20px;
+    max-height: 320px; 
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+/* --- TABLA DE DETALLE CON ALINEACIÓN TOTAL A LA IZQUIERDA --- */
+
+.tabla-detalle {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background-color: white;
+}
+
+/* Aplica alineación a la izquierda obligatoria a todas las celdas y cabeceras */
+.tabla-detalle th,
+.tabla-detalle td {
+    text-align: left !important;
+    padding: 14px 16px;
+}
+
+/* Encabezados de la tabla */
+.tabla-detalle thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Celdas del cuerpo */
+.tabla-detalle tbody td {
+    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-dark);
+    vertical-align: middle;
+}
+
+/* Efecto hover en filas */
+.tabla-detalle tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.tabla-detalle .detail-product-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* ------------------------------------------------------ */
+
+/* Caja de totales */
+.detail-total-box {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 2px dashed var(--border-color);
+}
+
+.detail-total-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.detail-total-amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-dark-teal);
+}
 
 .form-error.active {
     opacity: 1;
@@ -748,6 +876,9 @@ body {
     border-left: 4px solid #e74c3c;
 }
 
+.text-center{
+    text-align: center;
+}
 
 /* RESPONSIVE DESIGN */
 @media screen and (max-width: 768px) {
