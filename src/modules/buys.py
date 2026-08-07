@@ -9,7 +9,7 @@ buy_blueprint = Blueprint('buy', __name__)
 
 @buy_blueprint.route('/compras', methods=['GET'])
 def query_purchases():
-    # 1. Parámetros para la tabla principal de Compras
+    #  Parámetros para la tabla principal de Compras
     page = request.args.get('page', 1, type=int)
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
@@ -28,7 +28,7 @@ def query_purchases():
     pagination = query_compras.paginate(page=page, per_page=10, error_out=False)
 
 
-    # 3. Obtener catálogo de productos para el modal de registro paso 2
+    #  Obtener catálogo de productos para el modal de registro paso 2
     productos = Producto.query.all()
     fecha_actual = datetime.now().strftime('%Y-%m-%d')
 
@@ -94,61 +94,78 @@ def register_purchase_page():
 @buy_blueprint.route('/compras/guardar', methods=['POST'])
 def save_purchase_multi():
     try:
-        id_proveedor = session.get('compra_id_proveedor')
-        fecha_compra_str = request.form.get('fecha_compra')
-        monto_total = float(request.form.get('monto_total', 0))
+        #  Obtener datos de cabecera
+        IdProveedor = session.get('compra_id_proveedor')
+        Fecha_str = request.form.get('Fecha')
+        MontoTotal = float(request.form.get('MontoTotal', 0))
 
-        if not id_proveedor:
+        if not IdProveedor:
             flash('Sesión expirada. Vuelva a seleccionar el proveedor.', 'danger')
             return redirect(url_for('buy.select_provider_page'))
 
-        fecha_compra = datetime.strptime(fecha_compra_str, '%Y-%m-%d').date()
+        Fecha = datetime.strptime(Fecha_str, '%Y-%m-%d').date()
 
-        # 1. Crear la cabecera de la Compra
+        # Instancia de Compra
         nueva_compra = Compra(
-            IdProveedor=int(id_proveedor),
-            Fecha=fecha_compra,
-            MontoTotal=monto_total
+            IdProveedor=int(IdProveedor),
+            Fecha=Fecha,
+            MontoTotal=round(MontoTotal, 2)
         )
         db.session.add(nueva_compra)
         db.session.flush()
 
-        # 2. Recorrer los detalles enviados
+        #  Recorrer los detalles enviados mediante indices de formulario
         index = 0
-        while f'productos[{index}][id_producto]' in request.form:
-            id_producto = int(request.form.get(f'productos[{index}][id_producto]'))
-            cantidad = int(request.form.get(f'productos[{index}][cantidad]'))
-            costo_unitario = float(request.form.get(f'productos[{index}][costo_unitario]'))
-            porc_contado = float(request.form.get(f'productos[{index}][porc_contado]', 0))
-            porc_credito = float(request.form.get(f'productos[{index}][porc_credito]', 0))
+        while f'productos[{index}][IdProducto]' in request.form:
+            IdProducto = int(request.form.get(f'productos[{index}][IdProducto]'))
+            Cantidad = int(request.form.get(f'productos[{index}][Cantidad]'))
+            CostoUnitario = float(request.form.get(f'productos[{index}][CostoUnitario]'))
+            Subtotal = round(Cantidad * CostoUnitario, 2)
 
-            subtotal = cantidad * costo_unitario
+            prod = Producto.query.get(IdProducto)
 
-            # Crear detalle en ProductoCompra
+            # Intentar obtener los precios calculados enviados desde el frontend JS
+            precio_contado_form = request.form.get(f'productos[{index}][PrecioDecontado]') or request.form.get(f'productos[{index}][PrecioDeContado]')
+            precio_credito_form = request.form.get(f'productos[{index}][PrecioCredito]')
+
+            if precio_contado_form and precio_credito_form:
+                PrecioDecontado = round(float(precio_contado_form), 2)
+                PrecioCredito = round(float(precio_credito_form), 2)
+            else:
+                # Respaldo: Recalcular con porcentajes de la base de datos si no vienen en el POST
+                porc_contado = prod.PorcenajeDeContado if (prod and hasattr(prod, 'PorcenajeDeContado') and prod.PorcenajeDeContado) else 0
+                porc_credito = prod.PorcentajeCredito if (prod and hasattr(prod, 'PorcentajeCredito') and prod.PorcentajeCredito) else 0
+
+                PrecioDecontado = round(CostoUnitario * (1 + (porc_contado / 100)), 2)
+                PrecioCredito = round(CostoUnitario * (1 + (porc_credito / 100)), 2)
+
+            # Instancia de ProductoCompra (Detalle de la compra)
             detalle = ProductoCompra(
                 IdCompra=nueva_compra.IdCompra,
-                IdProducto=id_producto,
-                Cantidad=cantidad,
-                CostoUnitario=costo_unitario,
-                Subtotal=subtotal,
-                PrecioDecontado=costo_unitario * (1 + (porc_contado / 100)),
-                PrecioCredito=costo_unitario * (1 + (porc_credito / 100))
+                IdProducto=IdProducto,
+                Cantidad=Cantidad,
+                CostoUnitario=CostoUnitario,
+                Subtotal=Subtotal,
+                PrecioDecontado=PrecioDecontado,
+                PrecioCredito=PrecioCredito
             )
             db.session.add(detalle)
 
-            # Actualizar porcentajes y precios en catálogo base
-            prod = Producto.query.get(id_producto)
+            # Actualizar precios catálogo en el modelo Producto
             if prod:
-                prod.PorcenajeDeContado = int(porc_contado)
-                prod.PorcentajeCredito = int(porc_credito)
-                prod.PrecioDeContado = costo_unitario * (1 + (porc_contado / 100))
-                prod.PrecioCredito = costo_unitario * (1 + (porc_credito / 100))
+                if hasattr(prod, 'PrecioDecontado'):
+                    prod.PrecioDecontado = PrecioDecontado
+                elif hasattr(prod, 'PrecioDeContado'):
+                    prod.PrecioDeContado = PrecioDecontado
+
+                if hasattr(prod, 'PrecioCredito'):
+                    prod.PrecioCredito = PrecioCredito
 
             index += 1
 
         db.session.commit()
 
-        # Limpiamos los datos temporales de la sesión
+        # Limpiar variables de sesión
         session.pop('compra_id_proveedor', None)
         session.pop('compra_nombre_proveedor', None)
 

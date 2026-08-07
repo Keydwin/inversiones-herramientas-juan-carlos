@@ -1,4 +1,4 @@
-// Funciones globales unificadas para apertura y cierre de modales
+
 function abrirModal(id) {
     const modal = document.getElementById(id);
     if (modal) {
@@ -23,7 +23,7 @@ function cerrarModalDetalle(idCompra) {
     cerrarModal(`modalDetalle${idCompra}`);
 }
 
-// Filtro de búsqueda en el modal de proveedores
+
 function filtrarProveedoresModal() {
     let input = document.getElementById('buscarProveedorModal').value.toLowerCase();
     let rows = document.querySelectorAll('#tbodyProveedoresModal .provider-row-select');
@@ -39,7 +39,7 @@ function filtrarProveedoresModal() {
     });
 }
 
-// Flujo de modales en cadena (Paso 1 -> Paso 2)
+
 function seleccionarProveedor(id, nombre) {
     document.getElementById('compra_id_proveedor').value = id;
     document.getElementById('compra_nombre_proveedor').value = nombre;
@@ -55,9 +55,9 @@ function regresarAPaso1() {
 
 let productoIndex = 0;
 
-// Configuración al cargar el documento (Restricciones e Integración de Inputs Opcionales)
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Marcamos los inputs auxiliares de la compra como opcionales para el Validador Global
+
     const inputsAuxiliares = [
         'selector_producto_compra',
         'input_cantidad_compra',
@@ -69,9 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     inputsAuxiliares.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            el.classList.add('opcional'); // Esta clase hace que tu Form Global Validator lo ignore
+            el.classList.add('opcional'); 
             
-            // Impide ingresar cero o valores negativos en tiempo real
+
             if (id !== 'selector_producto_compra') {
                 el.setAttribute('min', id === 'input_cantidad_compra' ? '1' : '0.01');
                 el.addEventListener('input', function () {
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// FORM GLOBAL VALIDATOR INTEGRADO (Sin mensajes de error visibles)
+
 let errorTimeout = null; 
 document.addEventListener('submit', (e) => {
     const currentForm = e.target;
@@ -104,7 +104,7 @@ document.addEventListener('submit', (e) => {
     if (errorTimeout) clearTimeout(errorTimeout);
 
     formControls.forEach(control => {
-        // Omite validación si tiene la clase opcional
+
         if (control.classList.contains('opcional')) {
             control.value = control.value.trim();
             return;
@@ -134,7 +134,7 @@ document.addEventListener('submit', (e) => {
         }
     });
 
-    // Validación adicional: Comprobar que haya al menos un producto en la tabla de compras
+
     const tbodyDetalle = currentForm.querySelector('#tbodyDetalleNuevaCompra');
     if (tbodyDetalle) {
         const filasProductos = tbodyDetalle.querySelectorAll('.item-compra-row');
@@ -145,7 +145,7 @@ document.addEventListener('submit', (e) => {
 
     if (isFormInvalid) {
         e.preventDefault();
-        // Se resalta el borde pero no se muestra ningún texto descriptivo
+
         if (errorSummary) {
             errorSummary.textContent = "";
             errorSummary.classList.remove('active');
@@ -157,147 +157,167 @@ document.addEventListener('submit', (e) => {
     }
 });
 
-// Al seleccionar un producto, cargamos sus % de ganancia base
+
+
 function alSeleccionarProducto() {
-    const selector = document.getElementById('selector_producto_compra');
-    const option = selector.options[selector.selectedIndex];
+    const select = document.getElementById('selector_producto_compra');
+    if (!select || select.selectedIndex === -1) return;
 
-    if (option && option.value !== "") {
-        const porcContado = parseFloat(option.getAttribute('data-porc-contado')) || "";
-        const porcCredito = parseFloat(option.getAttribute('data-porc-credito')) || "";
+    const option = select.options[select.selectedIndex];
+    
+    if (option && option.value) {
+        const porcContado = option.getAttribute('data-porc-contado') || 0;
+        const porcCredito = option.getAttribute('data-porc-credito') || 0;
 
-        document.getElementById('input_porc_contado').value = porcContado > 0 ? porcContado : "";
-        document.getElementById('input_porc_credito').value = porcCredito > 0 ? porcCredito : "";
+        document.getElementById('input_porc_contado').value = porcContado;
+        document.getElementById('input_porc_credito').value = porcCredito;
     } else {
-        document.getElementById('input_porc_contado').value = "";
-        document.getElementById('input_porc_credito').value = "";
+        document.getElementById('input_porc_contado').value = '';
+        document.getElementById('input_porc_credito').value = '';
     }
-
+    
     recalcularPreciosVentaModal();
 }
 
-// Recalcula en tiempo real los precios sugeridos en la vista previa
+
 function recalcularPreciosVentaModal() {
-    const costoUnitario = parseFloat(document.getElementById('input_costo_unitario').value) || 0;
+    const costo = parseFloat(document.getElementById('input_costo_unitario').value) || 0;
     const porcContado = parseFloat(document.getElementById('input_porc_contado').value) || 0;
     const porcCredito = parseFloat(document.getElementById('input_porc_credito').value) || 0;
 
-    if (costoUnitario > 0 && porcContado > 0 && porcCredito > 0) {
-        const pContadoCalc = costoUnitario * (1 + (porcContado / 100));
-        const pCreditoCalc = costoUnitario * (1 + (porcCredito / 100));
+    const precioContado = costo + (costo * (porcContado / 100));
+    const precioCredito = costo + (costo * (porcCredito / 100));
 
-        document.getElementById('txt_precio_contado_calc').innerText = `${pContadoCalc.toFixed(2)}`;
-        document.getElementById('txt_precio_credito_calc').innerText = `${pCreditoCalc.toFixed(2)}`;
-    } else {
-        document.getElementById('txt_precio_contado_calc').innerText = "0.00";
-        document.getElementById('txt_precio_credito_calc').innerText = "0.00";
-    }
+    document.getElementById('txt_precio_contado_calc').innerText = precioContado.toFixed(2);
+    document.getElementById('txt_precio_credito_calc').innerText = precioCredito.toFixed(2);
 }
 
-// Agrega la fila a la tabla dinámicamente (alertas eliminadas)
-function agregarProductoALaTabla(e) {
-    if (e && e.preventDefault) e.preventDefault();
 
-    const selector = document.getElementById('selector_producto_compra');
-    const idProducto = selector.value;
-    const optionSeleccionada = selector.options[selector.selectedIndex];
-    const nombreProducto = optionSeleccionada ? optionSeleccionada.getAttribute('data-nombre') : '';
+function agregarProductoALaTabla() {
+    const select = document.getElementById('selector_producto_compra');
+    const idProducto = select.value;
     
-    const cantVal = document.getElementById('input_cantidad_compra').value.trim();
-    const costoVal = document.getElementById('input_costo_unitario').value.trim();
-    const contadoVal = document.getElementById('input_porc_contado').value.trim();
-    const creditoVal = document.getElementById('input_porc_credito').value.trim();
-
-    // Validaciones específicas del botón "Agregar" sin mensajes emergentes
-    if (!idProducto) return;
-    if (cantVal === "" || costoVal === "" || contadoVal === "" || creditoVal === "") return;
-
-    const cantidad = parseInt(cantVal, 10);
-    const costoUnitario = parseFloat(costoVal);
-    const porcContado = parseFloat(contadoVal);
-    const porcCredito = parseFloat(creditoVal);
-
-    if (isNaN(cantidad) || cantidad <= 0 || isNaN(costoUnitario) || costoUnitario <= 0 || isNaN(porcContado) || porcContado <= 0 || isNaN(porcCredito) || porcCredito <= 0) {
+    if (!idProducto) {
+        alert('Por favor seleccione un producto.');
         return;
     }
 
-    // Quitar fila vacía
-    const rowVacia = document.getElementById('row_vacia_tabla');
-    if (rowVacia) rowVacia.remove();
+    const option = select.options[select.selectedIndex];
+    const nombreProducto = option.getAttribute('data-nombre') || option.text;
+    const cantidad = parseInt(document.getElementById('input_cantidad_compra').value) || 0;
+    const costoUnitario = parseFloat(document.getElementById('input_costo_unitario').value) || 0;
 
+    if (cantidad <= 0 || costoUnitario <= 0) {
+        alert('Por favor ingrese una cantidad y costo unitario válidos.');
+        return;
+    }
+
+
+    const precioContado = parseFloat(document.getElementById('txt_precio_contado_calc').innerText) || 0;
+    const precioCredito = parseFloat(document.getElementById('txt_precio_credito_calc').innerText) || 0;
     const subtotal = cantidad * costoUnitario;
+
     const tbody = document.getElementById('tbodyDetalleNuevaCompra');
     
-    const nuevaFila = document.createElement('tr');
-    nuevaFila.className = 'item-compra-row';
-    
-    nuevaFila.innerHTML = `
-        <td class="detail-product-name">
-            <input type="hidden" name="productos[${productoIndex}][id_producto]" value="${idProducto}">
+
+    const rowVacia = document.getElementById('row_vacia_tabla');
+    if (rowVacia) {
+        rowVacia.remove();
+    }
+
+
+    const index = tbody.querySelectorAll('.item-compra-row').length;
+
+    const row = document.createElement('tr');
+    row.classList.add('item-compra-row'); 
+    row.innerHTML = `
+        <td>
             ${nombreProducto}
+            <input type="hidden" name="productos[${index}][IdProducto]" value="${idProducto}">
         </td>
         <td>
-            <input type="hidden" name="productos[${productoIndex}][cantidad]" value="${cantidad}">
             ${cantidad}
+            <input type="hidden" name="productos[${index}][Cantidad]" value="${cantidad}">
         </td>
         <td>
-            <input type="hidden" name="productos[${productoIndex}][costo_unitario]" value="${costoUnitario.toFixed(2)}">
             ${costoUnitario.toFixed(2)}
+            <input type="hidden" name="productos[${index}][CostoUnitario]" value="${costoUnitario.toFixed(2)}">
         </td>
         <td>
-            <input type="hidden" name="productos[${productoIndex}][porc_contado]" value="${porcContado}">
-            ${porcContado}%
+            ${precioContado.toFixed(2)}
+            <input type="hidden" name="productos[${index}][PrecioDecontado]" value="${precioContado.toFixed(2)}">
         </td>
         <td>
-            <input type="hidden" name="productos[${productoIndex}][porc_credito]" value="${porcCredito}">
-            ${porcCredito}%
+            ${precioCredito.toFixed(2)}
+            <input type="hidden" name="productos[${index}][PrecioCredito]" value="${precioCredito.toFixed(2)}">
         </td>
-        <td class="row-subtotal" data-valor="${subtotal}">${subtotal.toFixed(2)}</td>
         <td>
-            <button type="button" class="action-btn delete-btn" onclick="eliminarFilaProducto(this)">
-                <span class="material-symbols-outlined">delete</span>Eliminar
+            ${subtotal.toFixed(2)}
+            <input type="hidden" name="productos[${index}][Subtotal]" value="${subtotal.toFixed(2)}">
+        </td>
+        <td>
+           
+            <button type="button" class="action-btn delete-btn" onclick="eliminarFila(this)">
+                    <span class="material-symbols-outlined">delete</span>Eliminar
             </button>
         </td>
     `;
-    
-    tbody.appendChild(nuevaFila);
-    productoIndex++;
-    
-    // Limpiar inputs
-    selector.value = "";
-    document.getElementById('input_cantidad_compra').value = 1;
-    document.getElementById('input_costo_unitario').value = "";
-    document.getElementById('input_porc_contado').value = "";
-    document.getElementById('input_porc_credito').value = "";
-    recalcularPreciosVentaModal();
-    
-    calcularGranTotalCompra();
+
+    tbody.appendChild(row);
+    actualizarTotalGeneral();
+    limpiarEntradasModal();
 }
 
-function eliminarFilaProducto(btn) {
-    btn.closest('tr').remove();
+
+function reindexarFilas() {
+    const tbody = document.getElementById('tbodyDetalleNuevaCompra');
+    const filas = tbody.querySelectorAll('.item-compra-row');
+
+    filas.forEach((row, newIndex) => {
+        row.querySelectorAll('input[type="hidden"]').forEach(input => {
+            input.name = input.name.replace(/productos\[\d+\]/, `productos[${newIndex}]`);
+        });
+    });
+}
+
+function eliminarFila(btn) {
+    const row = btn.closest('tr');
+    row.remove();
     
     const tbody = document.getElementById('tbodyDetalleNuevaCompra');
-    if (tbody.children.length === 0) {
+    const filasRestantes = tbody.querySelectorAll('.item-compra-row');
+    
+    if (filasRestantes.length === 0) {
         tbody.innerHTML = `
             <tr id="row_vacia_tabla">
-                <td colspan="7" class="text-muted" style="text-align: center !important; padding: 20px;">
-                    Ningún producto agregado a esta compra todavía.
-                </td>
+                <td colspan="7" class="text-center">No se han agregado productos a la lista de compra</td>
             </tr>
         `;
+    } else {
+        reindexarFilas();
     }
-    calcularGranTotalCompra();
+    actualizarTotalGeneral();
 }
 
-function calcularGranTotalCompra() {
-    let granTotal = 0;
-    const subtotales = document.querySelectorAll('#tbodyDetalleNuevaCompra .row-subtotal');
-    
-    subtotales.forEach(celda => {
-        granTotal += parseFloat(celda.getAttribute('data-valor')) || 0;
+
+function actualizarTotalGeneral() {
+    let total = 0;
+    const subtotales = document.querySelectorAll('input[name*="[Subtotal]"]');
+    subtotales.forEach(input => {
+        total += parseFloat(input.value) || 0;
     });
-    
-    document.getElementById('txt_monto_total_compra').innerText = `${granTotal.toFixed(2)}`;
-    document.getElementById('input_monto_total_hidden').value = granTotal.toFixed(2);
+
+    document.getElementById('txt_monto_total_compra').innerText = total.toFixed(2);
+    document.getElementById('input_monto_total_hidden').value = total.toFixed(2);
+}
+
+
+function limpiarEntradasModal() {
+    document.getElementById('selector_producto_compra').value = '';
+    document.getElementById('input_cantidad_compra').value = '';
+    document.getElementById('input_costo_unitario').value = '';
+    document.getElementById('input_porc_contado').value = '';
+    document.getElementById('input_porc_credito').value = '';
+    document.getElementById('txt_precio_contado_calc').innerText = '0.00';
+    document.getElementById('txt_precio_credito_calc').innerText = '0.00';
 }

@@ -172,8 +172,8 @@
                         <th>Producto</th>
                         <th>Cant.</th>
                         <th>Costo Unit.</th>
-                        <th>% Contado</th>
-                        <th>% Crédito</th>
+                        <th>Precio Contado</th>
+                        <th>Precio Crédito</th>
                         <th>Subtotal</th>
                     </tr>
                 </thead>
@@ -183,8 +183,8 @@
                         <td>{{ detalle.producto.NombreProducto }}</td>
                         <td>{{ detalle.Cantidad }}</td>
                         <td>{{ "%.2f"|format(detalle.CostoUnitario) }}</td>
-                        <td>{{ detalle.PrecioDecontado }}</td>
-                        <td>{{ detalle.PrecioCredito }}</td>
+                        <td>{{ "%.2f"|format(detalle.PrecioDecontado) }}</td>
+                        <td>{{ "%.2f"|format(detalle.PrecioCredito) }}</td>
                         <td>{{ "%.2f"|format(detalle.Subtotal) }}</td>
                     </tr>
                     {% else %}

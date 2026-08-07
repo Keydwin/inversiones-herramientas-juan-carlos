@@ -1068,14 +1068,14 @@ body {
         padding: 16px;
     }
 
-    /* Grid de Entradas de Producto (2 columnas en tablets/móviles grandes) */
+
     .purchase-grid-inputs {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
 
     .form-group-item:first-child {
-        grid-column: span 2; /* El selector de productos ocupa todo el ancho */
+        grid-column: span 2;
     }
 
     .btn-add-item {
