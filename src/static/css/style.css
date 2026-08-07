@@ -239,6 +239,7 @@ body {
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(16, 163, 127, 0.1);
     transition: all 0.2s ease;
+    text-decoration: none;
 }
 
 .btn-register:hover {
@@ -749,7 +750,7 @@ body {
     box-sizing: border-box;
 }
 
-/* Título interno */
+
 .contenedor-detalle-compra h2 {
     margin-top: 0;
     margin-bottom: 24px;
@@ -786,7 +787,7 @@ body {
     cursor: default;
 }
 
-/* Contenedor de la tabla con scroll vertical */
+
 .detail-table-container {
     margin-top: 24px;
     margin-bottom: 20px;
@@ -796,7 +797,7 @@ body {
     border-radius: 10px;
 }
 
-/* --- TABLA DE DETALLE CON ALINEACIÓN TOTAL A LA IZQUIERDA --- */
+
 
 .tabla-detalle {
     width: 100%;
@@ -805,14 +806,14 @@ body {
     background-color: white;
 }
 
-/* Aplica alineación a la izquierda obligatoria a todas las celdas y cabeceras */
+
 .tabla-detalle th,
 .tabla-detalle td {
     text-align: left !important;
     padding: 14px 16px;
 }
 
-/* Encabezados de la tabla */
+
 .tabla-detalle thead th {
     background-color: #f8fafc;
     color: #475569;
@@ -823,14 +824,14 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Celdas del cuerpo */
+
 .tabla-detalle tbody td {
     border-bottom: 1px solid #f1f5f9;
     color: var(--text-dark);
     vertical-align: middle;
 }
 
-/* Efecto hover en filas */
+
 .tabla-detalle tbody tr:hover {
     background-color: #f8fafc;
 }
@@ -840,9 +841,9 @@ body {
     color: #1e293b;
 }
 
-/* ------------------------------------------------------ */
 
-/* Caja de totales */
+
+
 .detail-total-box {
     display: flex;
     justify-content: flex-end;
@@ -880,9 +881,140 @@ body {
     text-align: center;
 }
 
-/* RESPONSIVE DESIGN */
+/* ==========================================================================
+   Sección: Registro de Compras (Estilo tipo Modal)
+   ========================================================================== */
+
+.purchase-action-bar {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.purchase-action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.provider-info-text {
+    font-size: 1.1rem;
+}
+
+.provider-highlight {
+    color: #00796b;
+    font-weight: 600;
+}
+
+/* Tarjeta principal contenedora (Estilo Modal) */
+.purchase-card-container {
+    max-width: 100%;
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.modal-card-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.25rem;
+    color: #333333;
+    border-bottom: 2px solid #00796b;
+    padding-bottom: 8px;
+}
+
+/* Grid del formulario de entrada de productos */
+.purchase-grid-inputs {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.form-group-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-item label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #444444;
+}
+
+.select-product-input,
+.form-control-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+}
+
+.select-product-input:focus,
+.form-control-input:focus {
+    border-color: #00796b;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 121, 107, 0.25);
+}
+
+/* Barra de cálculo de precios */
+.calculated-prices-bar {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #555555;
+    background-color: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 4px solid #00796b;
+}
+
+.btn-add-item {
+    margin-top: 15px;
+}
+
+.icon-middle {
+    vertical-align: middle;
+}
+
+/* Barra inferior del resumen / total */
+.purchase-summary-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    padding: 15px 20px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.purchase-summary-bar h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #333333;
+}
+
+.total-amount-text {
+    color: #2e7d32;
+    font-weight: 700;
+}
+
+.btn-submit-purchase {
+    padding: 12px 24px;
+    font-size: 1rem;
+}
+
 @media screen and (max-width: 768px) {
     
+    /* Layout Global */
     .main-container {
         flex-direction: column;
     }
@@ -912,11 +1044,65 @@ body {
         padding: 12px; 
     }
 
+    /* Contenedor y Formulario de Compras */
+    .purchase-action-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .purchase-action-buttons {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .purchase-action-buttons button,
+    .purchase-action-buttons a,
+    .purchase-action-buttons .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .purchase-card-container {
+        padding: 16px;
+    }
+
+
+    .purchase-grid-inputs {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .form-group-item:first-child {
+        grid-column: span 2;
+    }
+
+    .btn-add-item {
+        width: 100%;
+        padding: 12px;
+    }
+
+    /* Resumen inferior de Compra */
+    .purchase-summary-bar {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .btn-submit-purchase {
+        width: 100%;
+        padding: 12px;
+    }
+
+    /* Tablas Responsive */
     .table-responsive {
         width: 100%;
         overflow-x: auto; 
         -webkit-overflow-scrolling: touch; 
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--border-color, #e0e0e0);
         border-radius: 8px;
         margin-bottom: 20px;
     }
@@ -930,6 +1116,7 @@ body {
         font-size: 14px;
     }
 
+    /* Modales */
     .modal-card {
         width: 95%;
         padding: 24px;
@@ -944,21 +1131,10 @@ body {
         width: 100%; 
     }
 
+    /* Alertas */
     .alert {
         left: 5vw;                  
         width: 90vw;                
         transform: none;            
     }
-
-    @keyframes slideDownMobile {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
-}
-
