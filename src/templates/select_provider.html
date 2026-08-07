@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compras</title>
+    <title>Seleccionar Proveedor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,7 +72,7 @@
         </aside>
 
         <main class="content">
-            <h1 class="page-title">Compras</h1>
+            <h1 class="page-title">Seleccionar Proveedor</h1>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -85,27 +85,17 @@
             {% endwith %}
 
             <div class="action-bar">
-                <!-- Formulario de filtro de fechas -->
-                <form action="" method="GET" style="display: flex; gap: 10px; align-items: center;">
+                <form action="{{ url_for('buy.select_provider_page') }}" method="GET">
                     <div class="search-container">
-                        <span class="material-symbols-outlined search-icon">calendar_today</span>
-                        <input type="date" name="start_date" class="opcional" value="{{ start_date }}" title="Fecha Desde">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" name="supplier" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
                     </div>
-
-                    <div class="search-container">
-                        <span class="material-symbols-outlined search-icon">calendar_today</span>
-                        <input type="date" name="end_date" class="opcional" value="{{ end_date }}" title="Fecha Hasta">
-                    </div>
-
                     <button type="submit" style="display: none;"></button>
-                </form> <!-- Cierre correcto del form de fechas -->
+                </form>
 
-                <!-- Botón fuera del formulario y con type="button" -->
-                <a href="{{ url_for('buy.select_provider_page') }}" class="btn-register" ">Registrar</a>
-
-                <a class="btn-report" id="btnGenerarPdf" href="#">
-                    <span class="material-symbols-outlined">picture_as_pdf</span>
-                    Generar reporte de Compras
+                <a class="btn-report" href="{{ url_for('buy.query_purchases') }}">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Cancelar
                 </a>
             </div>
 
@@ -113,104 +103,47 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Fecha</th>
                             <th>Proveedor</th>
-                            <th>Monto Total</th>
-                            <th>Acciones</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                       {% for compra in pagination.items %}
-                       <tr>
-                           <td>{{ compra.Fecha.strftime('%d/%m/%Y') }}</td>
-                           <td>{{ compra.proveedor.NombreProveedor }}</td>
-                           <td>{{ "%.2f"|format(compra.MontoTotal) }}</td>
-                           <td>
-                               <button type="button" class="action-btn details-btn" onclick="abrirModalDetalle('{{ compra.IdCompra }}')">
-                                   <span class="material-symbols-outlined">info</span> Ver Detalle
-                               </button>
-                           </td>
-                       </tr>
-                       {% else %}
-                           <tr>
-                               <td colspan="4" class="text-center">No se encontraron compras realizadas en dichas fechas establecidas</td>
-                           </tr>
-                       {% endfor %}
+                        {% for prov in proveedores_pagination.items %}
+                        <tr>
+                            <td>{{ prov.NombreProveedor }}</td>
+                            <td>
+                                <form action="{{ url_for('buy.save_provider_session', id_proveedor=prov.IdProveedor) }}" method="POST">
+                                    <button type="submit" class="action-btn select-btn" style="cursor: pointer;">
+                                        <span class="material-symbols-outlined">person</span> Seleccionar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center">No se encontraron proveedores registrados</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
 
             <div class="pagination-container">
-                {% if pagination.has_prev %}
-                    <a href="{{ url_for('buy.query_purchases', page=pagination.page - 1, supplier=search_query) }}" class="btn-page">Anterior</a>
+                {% if proveedores_pagination.has_prev %}
+                    <a href="{{ url_for('buy.select_provider_page', page=proveedores_pagination.prev_num, supplier=search_query) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
 
-                <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
+                <span class="page-indicator">Página {{ proveedores_pagination.page }} de {{ proveedores_pagination.pages if proveedores_pagination.pages > 0 else 1 }}</span>
 
-                {% if pagination.has_next %}
-                    <a href="{{ url_for('buy.query_purchases', page=pagination.page + 1, supplier=search_query) }}" class="btn-page">Siguiente</a>
+                {% if proveedores_pagination.has_next %}
+                    <a href="{{ url_for('buy.select_provider_page', page=proveedores_pagination.next_num, supplier=search_query) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}
             </div>
         </main>
     </div>
-
-{% for compra in pagination.items %}
-<div class="modal-overlay" id="modalDetalle{{ compra.IdCompra }}" style="display: none;">
-    <div class="contenedor-detalle-compra">
-        <h2>Detalle de Compra</h2>
-        <p><strong>Proveedor:</strong> {{ compra.proveedor.NombreProveedor }}</p>
-        <p><strong>Fecha:</strong> {{ compra.Fecha.strftime('%d/%m/%Y') }}</p>
-
-        <div class="detail-table-container">
-            <table class="tabla-detalle">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cant.</th>
-                        <th>Costo Unit.</th>
-                        <th>% Contado</th>
-                        <th>% Crédito</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for detalle in compra.productocompra %}
-                    <tr>
-                        <td>{{ detalle.producto.NombreProducto }}</td>
-                        <td>{{ detalle.Cantidad }}</td>
-                        <td>{{ "%.2f"|format(detalle.CostoUnitario) }}</td>
-                        <td>{{ detalle.PrecioDecontado }}</td>
-                        <td>{{ detalle.PrecioCredito }}</td>
-                        <td>{{ "%.2f"|format(detalle.Subtotal) }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="6" class="text-center" style="padding: 20px;">
-                            No hay productos registrados en esta compra.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="detail-total-box" style="margin-top: 15px;">
-            <span class="detail-total-label">Monto Total:</span>
-            <span class="detail-total-amount">{{ "%.2f"|format(compra.MontoTotal) }}</span>
-        </div>
-
-        <div class="actions" style="margin-top: 20px;">
-            <button type="button" class="btn-cancel" onclick="cerrarModalDetalle('{{ compra.IdCompra }}')">Cerrar</button>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-
-
 </body>
 </html>

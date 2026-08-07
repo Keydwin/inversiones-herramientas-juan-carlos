@@ -99,7 +99,9 @@ class ProductoCompra(db.Model):
     Cantidad = db.Column(db.Integer, nullable=False)
     PrecioDecontado = db.Column(db.Numeric(10, 2), nullable=False)
     PrecioCredito = db.Column(db.Numeric(10, 2), nullable=False)
-
+    CostoUnitario = db.Column(db.Numeric(10, 2), nullable=False)
+    Subtotal = db.Column(db.Numeric(10, 2), nullable=False)
+    
     producto = db.relationship('Producto')
     compra = db.relationship('Compra', back_populates='productocompra')
 
