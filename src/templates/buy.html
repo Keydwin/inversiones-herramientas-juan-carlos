@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/buy.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buy.js') }}" defer></script>
 </head>
 <body>
     <header class="topbar">
@@ -85,7 +85,7 @@
             {% endwith %}
 
             <div class="action-bar">
-                <!-- Formulario de filtro de fechas -->
+
                 <form action="" method="GET" style="display: flex; gap: 10px; align-items: center;">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">calendar_today</span>
@@ -98,15 +98,15 @@
                     </div>
 
                     <button type="submit" style="display: none;"></button>
-                </form> <!-- Cierre correcto del form de fechas -->
+                </form> 
 
-                <!-- Botón fuera del formulario y con type="button" -->
-                <a href="{{ url_for('buy.select_provider_page') }}" class="btn-register" ">Registrar</a>
 
-                <a class="btn-report" id="btnGenerarPdf" href="#">
+                <a href="{{ url_for('buy.select_provider_page') }}" class="btn-register">Registrar</a>
+
+                <button type="button" class="btn-report" id="btnGenerarPdf" onclick="abrirModalReporte()">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
                     Generar reporte de Compras
-                </a>
+                </button>
             </div>
 
             <div class="table-responsive">
@@ -170,10 +170,8 @@
                 <thead>
                     <tr>
                         <th>Producto</th>
-                        <th>Cant.</th>
-                        <th>Costo Unit.</th>
-                        <th>Precio Contado</th>
-                        <th>Precio Crédito</th>
+                        <th>Canttidad</th>
+                        <th>Costo Unitario</th>
                         <th>Subtotal</th>
                     </tr>
                 </thead>
@@ -183,13 +181,11 @@
                         <td>{{ detalle.producto.NombreProducto }}</td>
                         <td>{{ detalle.Cantidad }}</td>
                         <td>{{ "%.2f"|format(detalle.CostoUnitario) }}</td>
-                        <td>{{ "%.2f"|format(detalle.PrecioDecontado) }}</td>
-                        <td>{{ "%.2f"|format(detalle.PrecioCredito) }}</td>
                         <td>{{ "%.2f"|format(detalle.Subtotal) }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center" style="padding: 20px;">
+                        <td colspan="4" class="text-center" style="padding: 20px;">
                             No hay productos registrados en esta compra.
                         </td>
                     </tr>
@@ -210,7 +206,26 @@
 </div>
 {% endfor %}
 
-
+    <div class="modal-overlay" id="modalReportePdf" style="display: none;">
+        <div class="modal-card">
+            <h2>Generar Reporte de Compras</h2>
+            <form id="formReportePdf" action="{{ url_for('buy.generate_buy_report') }}" method="GET" target="_blank">
+                <div class="form-group">
+                    <label for="pdf_start_date">Fecha Desde</label>
+                    <input type="date" id="pdf_start_date" name="start_date" value="{{ start_date }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="pdf_end_date">Fecha Hasta</label>
+                    <input type="date" id="pdf_end_date" name="end_date" value="{{ end_date }}" required>
+                </div>
+                <div class="form-error"></div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" onclick="cerrarModalReporte()">Cancelar</button>
+                    <button type="submit" class="btn-modify">Generar PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>

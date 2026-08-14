@@ -97,8 +97,6 @@ class ProductoCompra(db.Model):
     IdProducto = db.Column(db.Integer, db.ForeignKey('producto.IdProducto'), nullable=False)
     IdCompra = db.Column(db.Integer, db.ForeignKey('compra.IdCompra'), nullable=False)
     Cantidad = db.Column(db.Integer, nullable=False)
-    PrecioDecontado = db.Column(db.Numeric(10, 2), nullable=False)
-    PrecioCredito = db.Column(db.Numeric(10, 2), nullable=False)
     CostoUnitario = db.Column(db.Numeric(10, 2), nullable=False)
     Subtotal = db.Column(db.Numeric(10, 2), nullable=False)
     
