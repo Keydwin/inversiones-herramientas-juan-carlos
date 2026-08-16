@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Productos</title>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Productos</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Producto</th>
+                <th style="width: 290px;">Descripción</th>
+                <th>Marca</th>
+                <th>Porcentaje de Contado</th>
+                <th>Precio contado</th>
+                <th>Porcentaje de Credito</th>
+                <th>Precio credito</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.Codigo }}</td>
+                    <td>{{ product.NombreProducto.strip() }}</td>
+                    <td>{{ product.Descripcion.strip() }}</td>
+                    <td>
+                        {% if product.marca %}
+                            {{ product.marca.Marca.strip() }}
+                        {% endif %}
+                    </td>
+                    <td>{{ product.PorcenajeDeContado|trim }}</td>
+                    <td>{{ "%.2f"|format(product.PrecioDeContado|float) }}</td>
+                    <td>{{ product.PorcentajeCredito|trim }}</td>
+                    <td>{{ "%.2f"|format(product.PrecioCredito|float) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

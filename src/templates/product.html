@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="left-section">
+            <button class="menu-toggle" id="menuToggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <div class="user-section">
+            <div class="user-badge">Usuario: ******</div>
+            <button class="logout-btn">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar collapsed" id="sidebar">
+            <nav class="menu-nav">
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">point_of_sale</span> Ventas <span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Venta</a>
+                        <a href="#" class="submenu-item">- Entregas</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('buy.query_purchases') }}" class="menu-item"><span class="material-symbols-outlined">shopping_cart</span> Compras</a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">inventory_2</span>Inventario<span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Inventario</a>
+                        <a href="{{ url_for('trademark.query_trademarks') }}" class="submenu-item">- Marcas</a>
+                        <a href="{{ url_for('product.query_products') }}" class="submenu-item">- Productos</a>
+                    </div>
+                </div>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">menu_book</span> Contabilidad <span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Libro Diario</a>
+                    </div>
+                </div>
+
+                <a href="#" class="menu-item"><span class="material-symbols-outlined">bar_chart</span> Estadísticas</a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">groups</span> Recursos Humanos <span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Puestos de Trabajos</a>
+                        <a href="#" class="submenu-item">- Trabajadores</a>
+                        <a href="#" class="submenu-item">- Nominas</a>
+                    </div>
+                </div>
+
+                <a href="#" class="menu-item"><span class="material-symbols-outlined">account_circle</span> Usuarios</a>
+            </nav>
+        </aside>
+        <main class="content">
+            <h1 class="page-title">Productos</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="action-bar">
+                <form action="{{ url_for('product.query_products') }}" method="GET">
+                    <div class="search-container">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" name="product" placeholder="Ingresar producto para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                    </div>
+                </form>
+
+                <button class="btn-register" id="openProductBtn">Registrar</button>
+                
+                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('product.generate_product_report') }}">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    Generar reporte de Productos
+                </a>
+
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th style="width: 320px;">Descripción</th>
+                            <th>Marca</th>
+                            <th>Porcentaje de Contado</th>
+                            <th>Precio Contado</th>
+                            <th>Porcentaje de Crédito</th>
+                            <th>Precio Crédito</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in pagination.items %}
+                            <tr>
+                                <td>{{ product.Codigo|trim }}</td>
+                                <td>{{ product.NombreProducto|trim }}</td>
+                                <td>{{ product.Descripcion|trim }}</td>
+                                <td>{{ product.marca.Marca|trim }}</td>
+                                <td>{{ product.PorcenajeDeContado|trim }}</td>
+                                <td>{{ "%.2f"|format(product.PrecioDeContado|float) }}</td>
+                                <td>{{ product.PorcentajeCredito|trim }}</td>
+                                <td>{{ "%.2f"|format(product.PrecioCredito|float) }}</td>
+                                <td>
+                                    <button class="action-btn edit-btn" onclick="OpenProductUpdateModal(
+                                        '{{ product.IdProducto }}', 
+                                        '{{ product.Codigo }}', 
+                                        '{{ product.NombreProducto|trim }}', 
+                                        '{{ product.Descripcion|trim }}', 
+                                        '{{ product.IdMarca }}', 
+                                        '{{ product.PorcenajeDeContado }}', 
+                                        '{{ product.PrecioDeContado }}', 
+                                        '{{ product.PorcentajeCredito }}', 
+                                        '{{ product.PrecioCredito }}')">
+                                        <span class="material-symbols-outlined">edit</span>Editar
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="OpenProductDeleteModal('{{ product.IdProducto }}')">
+                                        <span class="material-symbols-outlined">delete</span>Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="9" class="text-center" style="text-align: center;">No se encontraron marcas registradas</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('product.query_products', page=pagination.page - 1, product=search_query) }}" class="btn-page">Anterior</a>
+                {% else %}
+                    <span class="btn-page disabled">Anterior</span>
+                {% endif %}
+
+                <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
+
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('product.query_products', page=pagination.page + 1, product=search_query) }}" class="btn-page">Siguiente</a>
+                {% else %}
+                    <span class="btn-page disabled">Siguiente</span>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="ProductModal">
+        <div class="modal-card">
+            <h2>Registro de Producto</h2>
+            <form id="ProductForm" action="{{ url_for('product.register_product') }}" method="POST">
+                
+                <div class="form-group">
+                    <label for="Codigo">Código del Producto</label>
+                    <input type="text" id="Codigo" name="Codigo" placeholder="Ingrese el código numérico">
+                </div>
+
+                <div class="form-group">
+                    <label for="NombreProducto">Nombre del Producto</label>
+                    <input type="text" id="NombreProducto" name="NombreProducto" placeholder="Ingrese el nombre del producto">
+                </div>
+
+                <div class="form-group">
+                    <label for="Descripcion">Descripción</label>
+                    <textarea id="Descripcion" name="Descripcion" rows="3" placeholder="Ingrese una descripción del producto"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="IdMarca">Marca Asociada</label>
+                    <select id="IdMarca" name="IdMarca">
+                        <option value="">Seleccionar Marca</option>
+                        {% for brand in brands %}
+                            <option value="{{ brand.IdMarca }}">{{ brand.Marca }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="PorcenajeDeContado">Porcentaje de Contado</label>
+                    <input type="number" id="PorcenajeDeContado" name="PorcenajeDeContado" placeholder="Ingrese el numero de porcentaje">
+                </div>
+
+                <div class="form-group">
+                    <label for="PrecioDeContado">Precio de Contado</label>
+                    <input type="number" id="PrecioDeContado" name="PrecioDeContado" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="PorcentajeCredito">Porcentaje de Crédito</label>
+                    <input type="number" id="PorcentajeCredito" name="PorcentajeCredito" placeholder="Ingrese el numero de porcentaje">
+                </div>
+
+                <div class="form-group">
+                    <label for="PrecioCredito">Precio de Crédito</label>
+                    <input type="number" id="PrecioCredito" name="PrecioCredito" step="0.01" placeholder="0.00">
+                </div>
+
+                
+                <div class="form-error"></div>
+
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeProductBtn">Cancelar</button>
+                    <button type="submit" class="btn-submit">Registrar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="EditProductModal" >
+    <div class="modal-card">
+        <h2>Modificar Producto</h2>
+        <form id="EditProductForm" action="" method="POST">
+            
+            <div class="form-group">
+                <label for="CodigoEdicion">Código del Producto</label>
+                <input type="text" id="CodigoEdicion" name="Codigo" placeholder="Ingrese el código numérico">
+            </div>
+
+            <div class="form-group">
+                <label for="NombreProductoEdicion">Nombre del Producto</label>
+                <input type="text" id="NombreProductoEdicion" name="NombreProducto" placeholder="Ingrese el nombre del producto">
+            </div>
+
+            <div class="form-group">
+                <label for="DescripcionEdicion">Descripción</label>
+                <textarea id="DescripcionEdicion" name="Descripcion" rows="3" placeholder="Ingrese una descripción del producto"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="IdMarcaEdicion">Marca Asociada</label>
+                <select id="IdMarcaEdicion" name="IdMarca">
+                    <option value="">Seleccionar Marca</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand.IdMarca }}">{{ brand.Marca }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="PorcenajeDeContadoEdicion">Porcentaje de Contado</label>
+                <input type="number" id="PorcenajeDeContadoEdicion" name="PorcenajeDeContado" placeholder="Ingrese el numero de porcentaje">
+            </div>
+
+            <div class="form-group">
+                <label for="PrecioDeContadoEdicion">Precio de Contado</label>
+                <input type="number" id="PrecioDeContadoEdicion" name="PrecioDeContado" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="form-group">
+                <label for="PorcentajeCreditoEdicion">Porcentaje de Crédito</label>
+                <input type="number" id="PorcentajeCreditoEdicion" name="PorcentajeCredito" placeholder="Ingrese el numero de porcentaje">
+            </div>
+
+            <div class="form-group">
+                <label for="PrecioCreditoEdicion">Precio de Crédito</label>
+                <input type="number" id="PrecioCreditoEdicion" name="PrecioCredito" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="form-error"></div>
+
+            <div class="actions">
+                <button type="button" class="btn-cancel" id="closeEditProductBtn">Cancelar</button>
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+            </div>                
+        </form>
+    </div>
+</div>
+
+
+
+<div class="modal-overlay" id="DeleteProductModal">
+        <div class="modal-card">
+            <h2>Eliminar Producto</h2>
+            <form id="DeleteProductForm" action="" method="POST">
+                <div class="form-group">
+                    <p>¿Está seguro de que desea eliminar el producto?</p>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeDeleteProductBtn">Cancelar</button>
+                    <button type="submit" class="btn-delete"">Eliminar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

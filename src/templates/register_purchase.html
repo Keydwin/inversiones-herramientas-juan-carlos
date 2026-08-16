@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Compra</title>
+    
+  
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buy.js') }}"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="left-section">
+            <button class="menu-toggle" id="menuToggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <div class="user-section">
+            <div class="user-badge">Usuario: ******</div>
+            <button class="logout-btn">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <aside class="sidebar collapsed" id="sidebar">
+            <nav class="menu-nav">
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">point_of_sale</span> Ventas <span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Venta</a>
+                        <a href="#" class="submenu-item">- Entregas</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('buy.query_purchases') }}" class="menu-item"><span class="material-symbols-outlined">shopping_cart</span> Compras</a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">inventory_2</span>Inventario<span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Inventario</a>
+                        <a href="{{ url_for('trademark.query_trademarks') }}" class="submenu-item">- Marcas</a>
+                        <a href="{{ url_for('product.query_products') }}" class="submenu-item">- Productos</a>
+                    </div>
+                </div>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">menu_book</span> Contabilidad <span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Libro Diario</a>
+                    </div>
+                </div>
+
+                <a href="#" class="menu-item"><span class="material-symbols-outlined">bar_chart</span> Estadísticas</a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">groups</span> Recursos Humanos <span class="arrow"></span></a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Puestos de Trabajos</a>
+                        <a href="#" class="submenu-item">- Trabajadores</a>
+                        <a href="#" class="submenu-item">- Nóminas</a>
+                    </div>
+                </div>
+
+                <a href="#" class="menu-item"><span class="material-symbols-outlined">account_circle</span> Usuarios</a>
+            </nav>
+        </aside>
+
+
+        <main class="content">
+            <h1 class="page-title">Registro de la compra</h1>
+
+       
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+    
+            <div class="action-bar purchase-action-bar">
+                <div class="provider-info-text">
+                    <strong>Proveedor:</strong> <span class="provider-highlight">{{ nombre_proveedor }}</span> 
+                </div>
+
+                <div class="purchase-action-buttons">
+                    <a class="btn-report" href="{{ url_for('buy.select_provider_page') }}">
+                        <span class="material-symbols-outlined">swap_horiz</span>
+                        Cambiar Proveedor
+                    </a>
+                    
+                    <a class="btn-report" href="{{ url_for('buy.query_purchases') }}">
+                        <span class="material-symbols-outlined">cancel</span>
+                        Cancelar Compra
+                    </a>
+                </div>
+            </div>
+
+      
+            <form action="{{ url_for('buy.save_purchase_multi') }}" method="POST" id="formRegistroCompra">
+                
+              
+                <input type="hidden" name="Fecha" value="{{ fecha_actual }}">
+                <input type="hidden" name="MontoTotal" id="input_monto_total_hidden" value="0.00">
+
+           
+                <div class="modal-card-proveedor purchase-card-container">
+                    <h3 class="modal-card-title">Agregar Producto a la Compra</h3>
+                    
+                    <div class="purchase-grid-inputs">
+                        <div class="form-group-item">
+                            <label for="selector_producto_compra">Producto</label>
+                            <select id="selector_producto_compra" class="opcional select-product-input" onchange="alSeleccionarProducto()">
+                                <option value="">Seleccionar</option>
+                                {% for p in productos %}
+                                <option value="{{ p.IdProducto }}" 
+                                        data-nombre="{{ p.NombreProducto }}" 
+                                        data-porc-contado="{{ p.PorcentajeContado if p.PorcentajeContado is defined else (p.PorcentajeDeContado if p.PorcentajeDeContado is defined else p.PorcenajeDeContado) }}" 
+                                        data-porc-credito="{{ p.PorcentajeCredito }}">
+                                    {{ p.NombreProducto }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group-item">
+                            <label for="input_cantidad_compra">Cantidad</label>
+                            <input type="number" id="input_cantidad_compra" class="opcional form-control-input" min="1" step="1">
+                        </div>
+
+                        <div class="form-group-item">
+                            <label for="input_costo_unitario">Costo Unitario</label>
+                            <input type="number" step="0.01" min="0" id="input_costo_unitario" class="opcional form-control-input" oninput="recalcularPreciosVentaModal()">
+                        </div>
+                        
+   
+                        <div class="form-group-item">
+                            <label for="input_porc_contado">Porcentaje Contado (%)</label>
+                            <input type="number" id="input_porc_contado" class="form-control-input" readonly tabindex="-1" placeholder="0.00">
+                        </div>
+
+                        <div class="form-group-item">
+                            <label for="input_porc_credito">Porcentaje Crédito (%)</label>
+                            <input type="number" id="input_porc_credito" class="form-control-input" readonly tabindex="-1" placeholder="0.00">
+                        </div>
+                    </div>
+
+
+                    <div class="calculated-prices-bar">
+                        Precio Contado: <strong id="txt_precio_contado_calc">0.00</strong> | 
+                        Precio Crédito: <strong id="txt_precio_credito_calc">0.00</strong>
+                    </div>
+
+                    <button type="button" class="btn-register btn-add-item" onclick="agregarProductoALaTabla()">
+                        <span class="material-symbols-outlined icon-middle">add</span> Agregar Producto
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Costo Unitario</th>
+                                <th>Subtotal</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyDetalleNuevaCompra">
+                            <tr id="row_vacia_tabla">
+                                <td colspan="5" class="text-center">No se han agregado productos a la lista de compra</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="purchase-summary-bar">
+                    <h2>Total Compra: <span id="txt_monto_total_compra" class="total-amount-text">0.00</span></h2>
+                    <button type="submit" class="btn-register btn-submit-purchase">
+                        <span class="material-symbols-outlined icon-middle">save</span> Registrar
+                    </button>
+                </div>
+
+            </form>
+        </main>
+    </div>
+</body>
+</html>
