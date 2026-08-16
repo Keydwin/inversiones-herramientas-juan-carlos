@@ -907,7 +907,7 @@ body {
     font-weight: 600;
 }
 
-/* Tarjeta principal contenedora (Estilo Modal) */
+/* Tarjeta principal contenedora  */
 .purchase-card-container {
     max-width: 100%;
     margin-bottom: 25px;
@@ -1073,7 +1073,7 @@ body {
 
 
 
-/* 1. Estructura base de las cajas y canvas */
+
 .chart-box {
     width: 100%;
     box-sizing: border-box;
@@ -1086,7 +1086,7 @@ body {
     position: relative;
 }
 
-/* 2. Grilla genérica (Regla Base) */
+
 .charts-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -1094,14 +1094,14 @@ body {
     margin-bottom: 25px;
 }
 
-/* 3. Variaciones (Ganan por estar abajo y/o tener clases combinadas) */
+
 .charts-grid.single-chart {
     grid-template-columns: 1fr;
 }
 
 .charts-grid.two-columns {
-    grid-template-columns: 1fr 1fr; /* o repeat(2, 1fr) */
-    gap: 35px; /* Ajusta el espacio deseado entre las 2 columnas */
+    grid-template-columns: 1fr 1fr; 
+    gap: 35px; 
 }
 
 .filters-card {
@@ -1124,7 +1124,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    flex: 1 1 180px; /* Tamaño adaptativo para responsividad */
+    flex: 1 1 180px;
     min-width: 160px;
 }
 
@@ -1147,7 +1147,7 @@ body {
     width: 100%;
 }
 
-/* Estado de Foco (Verde Esmeralda #10b981) */
+
 .filter-input:focus,
 .filter-select:focus {
     outline: none;
@@ -1162,7 +1162,7 @@ body {
     align-items: center;
 }
 
-/* Botón Filtrar (Verde Esmeralda #10b981 / Hover #059669) */
+
 .btn-filter {
     display: inline-flex;
     align-items: center;

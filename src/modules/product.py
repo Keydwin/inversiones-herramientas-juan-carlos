@@ -14,10 +14,10 @@ def query_products():
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('product', '').strip()
     
-    # Eager load brand relationship to optimize queries
-    query = Producto.query.options(joinedload(Producto.marca))
+    # Eager load brand relationship and order ascending by IdProducto
+    query = Producto.query.options(joinedload(Producto.marca)).order_by(Producto.IdProducto.asc())
     
-    # Apply search filters by code or product name
+    # Apply search filters by product name
     if search_query:
         query = query.filter(Producto.NombreProducto.ilike(f'%{search_query}%'))
             
@@ -28,7 +28,7 @@ def query_products():
     all_brands = Marca.query.order_by(Marca.Marca.asc()).all()
     
     # Render view template with data context
-    return render_template('product.html', pagination=pagination, search_query=search_query,brands=all_brands)
+    return render_template('product.html', pagination=pagination, search_query=search_query, brands=all_brands)
 
 @product_blueprint.route('/productos/registrar', methods=['POST'])
 def register_product():
@@ -64,6 +64,7 @@ def register_product():
         # Persist entry inside database session context
         db.session.add(NewProduct)
         db.session.commit()
+        flash('Producto Registrado con éxito.', 'success')
         
     except Exception as e:
         db.session.rollback()
@@ -107,6 +108,7 @@ def update_product(IdProducto):
 
         # Guardar los cambios en PostgreSQL
         db.session.commit()
+        flash('Producto Modificado con éxito.', 'success')
 
     except Exception as e:
         db.session.rollback()
@@ -120,6 +122,7 @@ def delete_product(IdProducto):
         producto = Producto.query.get_or_404(IdProducto)
         db.session.delete(producto)
         db.session.commit()
+        flash('Producto Eleminado exitosamente', 'success')
         
     except IntegrityError:
         db.session.rollback()

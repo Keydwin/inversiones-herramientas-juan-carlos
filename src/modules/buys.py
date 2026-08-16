@@ -60,7 +60,7 @@ def register_purchase_page():
     nombre_proveedor = session.get('compra_nombre_proveedor')
 
     if not id_proveedor:
-        flash('Por favor seleccione un proveedor primero.', 'warning')
+        flash('Por favor seleccione un proveedor primero.', 'danger')
         return redirect(url_for('buy.select_provider_page'))
 
     productos = Producto.query.all()
@@ -139,12 +139,12 @@ def save_purchase_multi():
             index += 1
 
         db.session.commit()
+        flash('Compra Registrado con éxito.', 'success')
 
         # Clear session variables
         session.pop('compra_id_proveedor', None)
         session.pop('compra_nombre_proveedor', None)
 
-        flash('Compra registrada con éxito.', 'success')
         return redirect(url_for('buy.query_purchases'))
 
     except Exception as e:
