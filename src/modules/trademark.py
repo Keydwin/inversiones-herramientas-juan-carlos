@@ -46,6 +46,7 @@ def register_trademark():
         new_trademark = Marca(Marca=trademark_name)
         db.session.add(new_trademark)
         db.session.commit()
+        flash('Marca Registrada con éxito.', 'success')
             
     # Redirect back to trademarks list
     return redirect(url_for('trademark.query_trademarks'))
@@ -59,15 +60,18 @@ def update_trademark(IdMarca):
     if trademark_name:
         trademark.Marca = trademark_name.strip()
         db.session.commit()
+        flash('Marca Modificada con éxito.', 'success')
         
     return redirect(url_for('trademark.query_trademarks'))
 
 @trademark_blueprint.route('/marcas/delete_trademark/<int:IdMarca>', methods=['POST'])
 def delete_trademark(IdMarca):
     try:
-        producto = Producto.query.get_or_404(IdMarca)
-        db.session.delete(producto)
+        # The Brand model must be consulted.
+        trademark = Marca.query.get_or_404(IdMarca)
+        db.session.delete(trademark)
         db.session.commit()
+        flash('Marca eliminada exitosamente', 'success')
         
     except IntegrityError:
         db.session.rollback()
@@ -75,7 +79,7 @@ def delete_trademark(IdMarca):
         
     except Exception as e:
         db.session.rollback()
-        flash(f'Error al intentar eliminar la marca', 'danger')
+        flash('Error al intentar eliminar la marca', 'danger')
     
     return redirect(url_for('trademark.query_trademarks'))
 
