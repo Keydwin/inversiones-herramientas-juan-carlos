@@ -1,10 +1,12 @@
 from flask import Flask
 from models import db
+
 # We imported the blueprint from the .py files
 from modules.trademark import trademark_blueprint
 from modules.product import product_blueprint
 from modules.buys import buy_blueprint
 from modules.statistics import stats_blueprint
+from modules.login import login_blueprint
 
 app = Flask(__name__)
 
@@ -18,6 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # We registered the blueprint in the central application
+app.register_blueprint(login_blueprint)
 app.register_blueprint(trademark_blueprint)
 app.register_blueprint(product_blueprint)
 app.register_blueprint(buy_blueprint)

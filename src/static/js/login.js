@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    // Form validation before sending it to the server
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -22,12 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 5000);
         }
 
+        // We verify that both fields have been completed.
         if (usuario === '' || contraseña === '') {
             mostrarError('Debe llenar todos los campos');
             return;
         }
 
         try {
+            // We send the JSON request to the login endpoint
             const response = await fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -36,8 +39,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const result = await response.json();
 
+            // If authentication is successful, we redirect to the products screen.
             if (result.success) {
-                window.location.href = '/dashboard';
+                window.location.href = result.redirect || '/productos';
             } else {
                 mostrarError(result.error || 'Usuario o contraseña incorrectos');
             }
