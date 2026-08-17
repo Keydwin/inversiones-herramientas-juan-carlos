@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/stats.js') }}" defer></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="left-section">
+            <button class="menu-toggle" id="menuToggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <div class="user-section">
+            <div class="user-badge">Usuario: ******</div>
+            <button class="logout-btn" title="Cerrar Sesión">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar collapsed" id="sidebar">
+            <nav class="menu-nav">
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">point_of_sale</span> Ventas <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Venta</a>
+                        <a href="#" class="submenu-item">- Entregas</a>
+                        <a href="#" class="submenu-item">- Clientes</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('buy.query_purchases') }}" class="menu-item">
+                    <span class="material-symbols-outlined">shopping_cart</span> Compras
+                </a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">inventory_2</span> Inventario <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Inventario</a>
+                        <a href="{{ url_for('trademark.query_trademarks') }}" class="submenu-item">- Marcas</a>
+                        <a href="{{ url_for('product.query_products') }}" class="submenu-item">- Productos</a>
+                    </div>
+                </div>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">menu_book</span> Contabilidad <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Libro Diario</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('stats.view_statistics') }}" class="menu-item active">
+                    <span class="material-symbols-outlined">bar_chart</span> Estadísticas
+                </a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">groups</span> Recursos Humanos <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Puestos de Trabajo</a>
+                        <a href="#" class="submenu-item">- Trabajadores</a>
+                        <a href="#" class="submenu-item">- Nóminas</a>
+                    </div>
+                </div>
+
+                <a href="#" class="menu-item">
+                    <span class="material-symbols-outlined">account_circle</span> Usuarios
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h1 class="page-title">Estadísticas</h1>
+
+            <div class="filters-card">
+                <form action="{{ url_for('stats.view_statistics') }}" method="GET" class="filters-form">
+                    <div class="filter-group">
+                        <label for="start_date">Desde:</label>
+                        <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="filter-input">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="end_date">Hasta:</label>
+                        <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="filter-input">
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                    <a href="{{ url_for('stats.view_statistics') }}" class="btn-reset" title="Limpiar filtros">
+                        <span class="material-symbols-outlined">restart_alt</span>
+                    </a>
+                    </div>
+                </form>
+            </div>
+
+
+            <div class="stats-cards-container">
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <span class="stat-card-title">Inversión (Compras)</span>
+                        <span class="stat-card-value">{{ "%.2f"|format(total_invertido) }}</span>
+                    </div>
+                    <span class="material-symbols-outlined stat-card-icon">shopping_cart</span>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <span class="stat-card-title">Ingresos (Ventas)</span>
+                        <span class="stat-card-value">{{ "%.2f"|format(total_ingresos) }}</span>
+                    </div>
+                    <span class="material-symbols-outlined stat-card-icon">point_of_sale</span>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <span class="stat-card-title">Ganancia</span>
+                        <span class="stat-card-value">{{ "%.2f"|format(balance_general) }}</span>
+                    </div>
+                    <span class="material-symbols-outlined stat-card-icon">account_balance_wallet</span>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <span class="stat-card-title">Unidades Vendidas</span>
+                        <span class="stat-card-value">{{ total_unidades_vendidas }}</span>
+                    </div>
+                    <span class="material-symbols-outlined stat-card-icon">sell</span>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <span class="stat-card-title">Unidades Compradas</span>
+                        <span class="stat-card-value">{{ total_unidades }}</span>
+                    </div>
+                    <span class="material-symbols-outlined stat-card-icon">inventory</span>
+                </div>
+            </div>
+
+            <div class="charts-grid two-columns">
+                <div class="chart-box doughnut-box">
+                    <h2 class="chart-title">
+                        <span class="material-symbols-outlined">pie_chart</span>
+                        Top 5 Productos Más Vendidos
+                    </h2>
+                    <div class="chart-container-sm">
+                        <canvas id="topSoldProductsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-box doughnut-box">
+                    <h2 class="chart-title">
+                        <span class="material-symbols-outlined">pie_chart</span>
+                        Top 5 Productos Más Comprados
+                    </h2>
+                    <div class="chart-container-sm">
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="charts-grid two-columns">
+                <div class="chart-box">
+                    <h2 class="chart-title">
+                        <span class="material-symbols-outlined">store</span>
+                        Top 5 Proveedores (Mayor Inversión)
+                    </h2>
+                    <div class="chart-container-horizontal">
+                        <canvas id="topSuppliersChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <h2 class="chart-title">
+                        <span class="material-symbols-outlined">person</span>
+                        Top 5 Clientes (Mayor Ingreso)
+                    </h2>
+                    <div class="chart-container-horizontal">
+                        <canvas id="topClientsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <script id="stats-data" type="application/json">
+    {
+        "months": {{ months | default([]) | tojson }},
+        "purchaseTotals": {{ purchase_totals | default([]) | tojson }},
+        "salesTotals": {{ sales_totals | default([]) | tojson }},
+        "prodNames": {{ prod_names | default([]) | tojson }},
+        "prodQtys": {{ prodQtys | default([]) | tojson }},
+        "soldProdNames": {{ sold_prod_names | default([]) | tojson }},
+        "soldProdQtys": {{ sold_prod_qtys | default([]) | tojson }},
+        "supplierNames": {{ supplier_names | default([]) | tojson }},
+        "supplierTotals": {{ supplier_totals | default([]) | tojson }},
+        "clientNames": {{ client_names | default([]) | tojson }},
+        "clientTotals": {{ client_totals | default([]) | tojson }}
+    }
+</script>
+</body>
+</html>
