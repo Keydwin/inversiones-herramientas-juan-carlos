@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Trabajadores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/worker.js') }}"></script>
+    <style>
+        /* Ajuste exacto para centrar y permitir scroll en modales altos sin romper el diseño */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-card {
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="left-section">
+            <button class="menu-toggle" id="menuToggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <div class="user-section">
+            <div class="user-badge">Usuario: ******</div>
+            <button class="logout-btn">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar collapsed" id="sidebar">
+            <nav class="menu-nav">
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">point_of_sale</span> Ventas <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Venta</a>
+                        <a href="#" class="submenu-item">- Entregas</a>
+                        <a href="#" class="submenu-item">- Clientes</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('buy.query_purchases') }}" class="menu-item">
+                    <span class="material-symbols-outlined">shopping_cart</span> Compras
+                </a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">inventory_2</span> Inventario <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Inventario</a>
+                        <a href="{{ url_for('trademark.query_trademarks') }}" class="submenu-item">- Marcas</a>
+                        <a href="{{ url_for('product.query_products') }}" class="submenu-item">- Productos</a>
+                    </div>
+                </div>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">menu_book</span> Contabilidad <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Libro Diario</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('stats.view_statistics') }}" class="menu-item">
+                    <span class="material-symbols-outlined">bar_chart</span> Estadísticas
+                </a>
+
+                <div class="menu-dropdown">
+                    <a href="#" class="menu-item dropdown-toggle active">
+                        <span class="material-symbols-outlined">groups</span> Recursos Humanos <span class="arrow"></span>
+                    </a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">- Puestos de Trabajo</a>
+                        <a href="{{ url_for('trabajador.query_workers') }}" class="submenu-item active">- Trabajadores</a>
+                        <a href="#" class="submenu-item">- Nóminas</a>
+                    </div>
+                </div>
+
+                <a href="#" class="menu-item"><span class="material-symbols-outlined">account_circle</span> Usuarios</a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h1 class="page-title">Trabajadores</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="action-bar">
+                <form action="{{ url_for('trabajador.query_workers') }}" method="GET">
+                    <div class="search-container">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" name="busqueda" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                    </div>
+                </form>
+                
+                <button class="btn-register" id="openWorkerModalBtn">Registrar</button>
+                
+                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('trabajador.generate_report') }}" target="_blank">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    Generar reporte de Trabajadores
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Teléfono</th>
+                            <th>Puesto de Trabajo</th>
+                            <th>Sueldo</th>
+                            <th class="text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for t in trabajadores %}
+                        {% set p = t.Persona or t.persona %}
+                        {% set puesto_obj = t.PuestoTrabajo or t.puestotrabajo or t.puesto %}
+        
+                        {% set p_cedula = p.Cedula or p.cedula if p else "" %}
+                        {% set p_nombre = p.Nombre or p.nombre if p else "" %}
+                        {% set p_apellido = p.Apellido or p.apellido if p else "" %}
+                        {% set raw_tel = (p.Telefono or p.telefono or "")|string %}
+                        {% set p_telefono = ("04" ~ raw_tel) if raw_tel|length == 9 else raw_tel %}
+                        {% set puesto_nombre = puesto_obj.Nombre or puesto_obj.nombre or puesto_obj.NombrePuesto or puesto_obj.PuestoTrabajo or puesto_obj.Descripcion if puesto_obj else "N/D" %}
+
+                        {% set id_trab = t.IdTrabajador or t.idTrabajador or t.id %}
+                        {% set id_puest = t.IdPuestoTrabajo or t.idPuestoTrabajo or "" %}
+                        {% set sueldo_v = t.Sueldo if t.Sueldo is not none else (t.sueldo if t.sueldo is not none else "") %}
+                        <tr>
+                            <td>{{ p_cedula }}</td>
+                            <td>{{ p_nombre }}</td>
+                            <td>{{ p_apellido }}</td>
+                            <td>{{ p_telefono }}</td>
+                            <td>{{ puesto_nombre }}</td>
+                            <td>{{ sueldo_v }}</td>
+                            <td class="text-center">
+                                <button class="action-btn edit-btn" onclick="openUpdateWorkerModal('{{ id_trab }}', '{{ p_cedula }}', '{{ p_nombre }}', '{{ p_apellido }}', '{{ p_telefono }}', '{{ id_puest }}', '{{ sueldo_v }}')">
+                                    <span class="material-symbols-outlined">edit</span>Editar
+                                </button>
+                                <button class="action-btn delete-btn" onclick="openDeleteWorkerModal('{{ id_trab }}')">
+                                    <span class="material-symbols-outlined">delete</span>Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No se encontraron trabajadores registrados</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <span class="btn-page disabled">Anterior</span>
+                <span class="page-indicator">Página 1 de 1</span>
+                <span class="btn-page disabled">Siguiente</span>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="WorkerModal">
+        <div class="modal-card">
+            <h2>Registro de Trabajador</h2>
+            <form id="WorkerForm" action="{{ url_for('trabajador.register_worker') }}" method="POST">
+                <div class="form-group">
+                    <label for="cedula">Cédula</label>
+                    <input type="text" id="cedula" name="cedula" placeholder="Ingrese la cédula" required>
+                </div>
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ingrese el nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="apellido">Apellido</label>
+                    <input type="text" id="apellido" name="apellido" placeholder="Ingrese el apellido" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" id="telefono" name="telefono" placeholder="Ingrese el teléfono">
+                </div>
+                <div class="form-group">
+                    <label for="idPuestoTrabajo">Puesto de Trabajo</label>
+                <select id="idPuestoTrabajo" name="idPuestoTrabajo" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; color: #333 !important; background-color: #fff !important;">
+                    <option value="" style="color: #333 !important; background-color: #fff !important;">Seleccione el puesto</option>
+                    {% for p in puestos %}
+                    <option value="{{ p.IdPuestoTrabajo or p.idPuestoTrabajo or p.id }}" style="color: #333 !important; background-color: #fff !important;">
+                        {{ p.Nombre or p.nombre or p.NombrePuesto or p.PuestoTrabajo or p.Descripcion or p.id }}
+                    </option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sueldo">Sueldo</label>
+                    <input type="text" id="sueldo" name="sueldo" placeholder="Ingrese el sueldo" required>
+                </div>
+                
+                <div class="form-error"></div>
+
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeWorkerBtn">Cancelar</button>
+                    <button type="submit" class="btn-submit">Registrar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="UpdateWorkerModal">
+        <div class="modal-card">
+            <h2>Modificar Trabajador</h2>
+            <form id="UpdateWorkerForm" action="" method="POST">
+                <div class="form-group">
+                    <label for="mod_cedula">Cédula</label>
+                    <input type="text" id="mod_cedula" name="cedula" required>
+                </div>
+                <div class="form-group">
+                    <label for="mod_nombre">Nombre</label>
+                    <input type="text" id="mod_nombre" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="mod_apellido">Apellido</label>
+                    <input type="text" id="mod_apellido" name="apellido" required>
+                </div>
+                <div class="form-group">
+                    <label for="mod_telefono">Teléfono</label>
+                    <input type="text" id="mod_telefono" name="telefono">
+                </div>
+                <div class="form-group">
+                    <label for="mod_puesto">Puesto de Trabajo</label>
+                    <select id="mod_puesto" name="idPuestoTrabajo" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="">Seleccione el puesto</option>
+                    
+                        {% for p in puestos %}
+                        <option value="{{ p.idPuestoTrabajo or p.IdPuestoTrabajo }}">{{ p.nombre or p.Nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mod_sueldo">Sueldo</label>
+                    <input type="text" id="mod_sueldo" name="sueldo" required>
+                </div>
+                
+                <div class="form-error"></div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeUpdateWorkerBtn">Cancelar</button>
+                    <button type="submit" class="btn-modify">Guardar Cambios</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="DeleteWorkerModal">
+        <div class="modal-card">
+            <h2>Eliminar Trabajador</h2>
+            <form id="DeleteWorkerForm" action="" method="POST">
+                <div class="form-group">
+                    <p>¿Está seguro de que desea eliminar al trabajador?</p>
+                </div>
+                
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeDeleteWorkerBtn">Cancelar</button>
+                    <button type="submit" class="btn-delete">Eliminar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const openWorkerModalBtn = document.getElementById('openWorkerModalBtn');
+            const WorkerModal = document.getElementById('WorkerModal');
+            const closeWorkerBtn = document.getElementById('closeWorkerBtn');
+
+            if (openWorkerModalBtn && WorkerModal && closeWorkerBtn) {
+                openWorkerModalBtn.addEventListener('click', () => {
+                    const form = WorkerModal.querySelector('form');
+                    if (form) form.reset();
+                    WorkerModal.classList.add('active');
+                });
+                closeWorkerBtn.addEventListener('click', () => WorkerModal.classList.remove('active'));
+            }
+        });
+
+        function openUpdateWorkerModal(id, cedula, nombre, apellido, telefono, idPuesto, sueldo) {
+            const UpdateWorkerModal = document.getElementById('UpdateWorkerModal');
+            const UpdateWorkerForm = document.getElementById('UpdateWorkerForm');
+            const closeUpdateWorkerBtn = document.getElementById('closeUpdateWorkerBtn');
+            
+            if (UpdateWorkerModal && UpdateWorkerForm) {
+                UpdateWorkerForm.action = `/trabajador/modificar/${id}`;
+                document.getElementById('mod_cedula').value = cedula;
+                document.getElementById('mod_nombre').value = nombre;
+                document.getElementById('mod_apellido').value = apellido;
+                document.getElementById('mod_telefono').value = telefono;
+                document.getElementById('mod_puesto').value = idPuesto;
+                document.getElementById('mod_sueldo').value = sueldo;
+                UpdateWorkerModal.classList.add('active');
+            }
+            if (closeUpdateWorkerBtn) {
+                closeUpdateWorkerBtn.addEventListener('click', () => UpdateWorkerModal.classList.remove('active'));
+            }
+        }
+
+        function openDeleteWorkerModal(id) {
+            const DeleteWorkerModal = document.getElementById('DeleteWorkerModal');
+            const DeleteWorkerForm = document.getElementById('DeleteWorkerForm');
+            const closeDeleteWorkerBtn = document.getElementById('closeDeleteWorkerBtn');
+            
+            if (DeleteWorkerModal && DeleteWorkerForm) {
+                DeleteWorkerForm.action = `/trabajador/eliminar/${id}`;
+                DeleteWorkerModal.classList.add('active');   
+            }
+            if (closeDeleteWorkerBtn) {
+                closeDeleteWorkerBtn.addEventListener('click', () => DeleteWorkerModal.classList.remove('active'));
+            }
+        }
+    </script>
+</body>
+</html>

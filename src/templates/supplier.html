@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/supplier.js') }}"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="left-section">
+            <button class="menu-toggle" id="menuToggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <div class="user-section">
+            <div class="user-badge">Usuario: ******</div>
+            <button class="logout-btn">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar collapsed" id="sidebar">
+            <nav class="menu-nav">
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h1 class="page-title">PROVEEDORES</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="action-bar">
+                <form action="{{ url_for('proveedores.query_suppliers') }}" method="GET">
+                    <div class="search-container">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" name="q" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                    </div>
+                </form>
+                
+                <button class="btn-register" id="openSupplierModalBtn">Registrar</button>
+                
+                <a class="btn-report" href="{{ url_for('proveedores.generate_supplier_report') }}">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    Generar reporte de Proveedores
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>NOMBRE O RAZÓN SOCIAL</th>
+                            <th class="text-center">ACCIÓN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if supplier %}
+                            {% for p in supplier %}
+                                <tr>
+                                    <td data-buscar="nombre">{{ p.NombreProveedor|trim }}</td>
+                                    <td class="text-center">
+                                        <button class="action-btn edit-btn" onclick="openUpdateSupplierModal('{{ p.IdProveedor }}', '{{ p.NombreProveedor|trim }}')">
+                                            <span class="material-symbols-outlined">edit</span>Editar
+                                        </button>
+                                        <button class="action-btn delete-btn" onclick="openDeleteSupplierModal('{{ p.IdProveedor }}')">
+                                            <span class="material-symbols-outlined">delete</span>Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center">No se encontraron proveedores registrados</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <span class="btn-page disabled">Anterior</span>
+                <span class="page-indicator">Página 1 de 1</span>
+                <span class="btn-page disabled">Siguiente</span>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL REGISTRO -->
+    <div class="modal-overlay" id="SupplierModal">
+        <div class="modal-card">
+            <h2>Registro del Proveedor</h2>
+            <form action="{{ url_for('proveedores.register_supplier') }}" method="POST">
+                <div class="form-group">
+                    <label for="NombreProveedor">Nombre o Razón Social</label>
+                    <input type="text" id="NombreProveedor" name="NombreProveedor" placeholder="Ingrese el nombre o razón social" required>
+                </div>
+                <div class="form-error"></div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeSupplierBtn">Cancelar</button>
+                    <button type="submit" class="btn-submit">Registrar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL MODIFICAR -->
+    <div class="modal-overlay" id="UpdateSupplierModal">
+        <div class="modal-card">
+            <h2>Modificar Proveedor</h2>
+            <form id="UpdateSupplierForm" action="" method="POST">
+                <div class="form-group">
+                    <label for="UpdateNombreProveedor">Nombre o Razón Social</label>
+                    <input type="text" id="UpdateNombreProveedor" name="NombreProveedor" placeholder="Modifique el nombre o razón social" required>
+                </div>
+                <div class="form-error"></div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeUpdateSupplierBtn">Cancelar</button>
+                    <button type="submit" class="btn-modify">Guardar Cambios</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR -->
+    <div class="modal-overlay" id="DeleteSupplierModal">
+        <div class="modal-card">
+            <h2>Eliminar Proveedor</h2>
+            <form id="DeleteSupplierForm" action="" method="POST">
+                <div class="form-group">
+                    <p>¿Está seguro de que desea eliminar a este proveedor?</p>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeDeleteSupplierBtn">Cancelar</button>
+                    <button type="submit" class="btn-delete">Eliminar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
