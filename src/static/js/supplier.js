@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Vincular el botón Registrar de la interfaz con el modal de Proveedores
+    // Modal controls for registration
     const openSupplierModalBtn = document.getElementById('openSupplierModalBtn');
     const SupplierModal = document.getElementById('SupplierModal');
     const closeSupplierBtn = document.getElementById('closeSupplierBtn');
     
+    // Form inputs by ID
+    const supplierInput = document.getElementById('NombreProveedor');
+    const updateSupplierInput = document.getElementById('UpdateNombreProveedor');
+
+    // Handle open/close modal action
     if (openSupplierModalBtn && SupplierModal && closeSupplierBtn) {
         openSupplierModalBtn.addEventListener('click', () => {
             const form = SupplierModal.querySelector('form');
@@ -13,54 +18,51 @@ document.addEventListener('DOMContentLoaded', () => {
         closeSupplierBtn.addEventListener('click', () => SupplierModal.classList.remove('active'));
     }
 
-    // Validación opcional para el campo de nombre del proveedor (solo letras y espacios)
-    const supplierInput = document.getElementById('NombreProveedor');
-    const updateSupplierInput = document.getElementById('UpdateNombreProveedor');
-
+    // Direct restrictions for supplier name input (Register)
     if (supplierInput) {
-        supplierInput.maxLength = 50;
+        supplierInput.maxLength = 30;
         supplierInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]/g, '');
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 ]/g, '');
         });
     }
 
+    // Direct restrictions for supplier name input (Update)
     if (updateSupplierInput) {
-        updateSupplierInput.maxLength = 50;
+        updateSupplierInput.maxLength = 30;
         updateSupplierInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]/g, '');
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 ]/g, '');
         });
     }
 });
 
-// 2. Funciones globales para las acciones de la tabla (Modificar y Eliminar)
-function openUpdateSupplierModal(id, nombre) {
+// GLOBAL TABLES FUNCTIONS (PROVEEDORES)
+
+// Open update modal and populate inputs with active row data
+function openUpdateModal(id, nombre) {
     const UpdateSupplierModal = document.getElementById('UpdateSupplierModal');
     const UpdateSupplierForm = document.getElementById('UpdateSupplierForm');
     const closeUpdateSupplierBtn = document.getElementById('closeUpdateSupplierBtn');
     const UpdateNombreProveedor = document.getElementById('UpdateNombreProveedor');
-    
+
     if (UpdateSupplierModal && UpdateSupplierForm && UpdateNombreProveedor && closeUpdateSupplierBtn) {
-        UpdateSupplierForm.action = `/proveedores/modificar/${id}`;
+        UpdateSupplierForm.action = `/proveedores/update_supplier/${id}`;
         UpdateNombreProveedor.value = nombre;
         UpdateSupplierModal.classList.add('active');
         
-        closeUpdateSupplierBtn.onclick = () => {
-            UpdateSupplierModal.classList.remove('active');
-        };
+        closeUpdateSupplierBtn.addEventListener('click', () => UpdateSupplierModal.classList.remove('active'));
     }
 }
 
-function openDeleteSupplierModal(id) {
+// Open delete modal and configure action URL
+function openDeleteModal(id) {
     const DeleteSupplierModal = document.getElementById('DeleteSupplierModal');
     const DeleteSupplierForm = document.getElementById('DeleteSupplierForm');
     const closeDeleteSupplierBtn = document.getElementById('closeDeleteSupplierBtn');
-    
+
     if (DeleteSupplierModal && DeleteSupplierForm && closeDeleteSupplierBtn) {
-        DeleteSupplierForm.action = `/proveedores/delete/${id}`;
-        DeleteSupplierModal.classList.add('active');   
+        DeleteSupplierForm.action = `/proveedores/delete_supplier/${id}`;
+        DeleteSupplierModal.classList.add('active'); 
         
-        closeDeleteSupplierBtn.onclick = () => {
-            DeleteSupplierModal.classList.remove('active');
-        };
+        closeDeleteSupplierBtn.addEventListener('click', () => DeleteSupplierModal.classList.remove('active'));
     }
 }

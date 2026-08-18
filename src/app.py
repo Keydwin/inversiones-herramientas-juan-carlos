@@ -5,10 +5,9 @@ from modules.trademark import trademark_blueprint
 from modules.product import product_blueprint
 from modules.buys import buy_blueprint
 from modules.statistics import stats_blueprint
+from modules.job_position import job_position_blueprint
+from modules.worker import worker_blueprint
 from modules.supplier import supplier_blueprint
-from modules.workers import workers_blueprint
-from modules.workstation import workstation_blueprint
-
 
 app = Flask(__name__)
 
@@ -26,9 +25,9 @@ app.register_blueprint(trademark_blueprint)
 app.register_blueprint(product_blueprint)
 app.register_blueprint(buy_blueprint)
 app.register_blueprint(stats_blueprint)
+app.register_blueprint(job_position_blueprint)
+app.register_blueprint(worker_blueprint)
 app.register_blueprint(supplier_blueprint)
-app.register_blueprint(workers_blueprint)
-app.register_blueprint(workstation_blueprint)
 
 # PostgreSQL tables are created if they are not already created
 with app.app_context():

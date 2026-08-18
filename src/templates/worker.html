@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puestos de Trabajo</title>
+    <title>Trabajadores</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/workstation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/worker.js') }}"></script>
 </head>
 <body>
+
     <header class="topbar">
         <div class="left-section">
             <button class="menu-toggle" id="menuToggle">
@@ -28,6 +29,7 @@
     </header>
 
     <div class="main-container">
+
         <aside class="sidebar collapsed" id="sidebar">
             <nav class="menu-nav">
                 <div class="menu-dropdown">
@@ -53,6 +55,7 @@
                         <a href="#" class="submenu-item">- Inventario</a>
                         <a href="{{ url_for('trademark.query_trademarks') }}" class="submenu-item">- Marcas</a>
                         <a href="{{ url_for('product.query_products') }}" class="submenu-item">- Productos</a>
+                        <a href="{{ url_for('supplier.query_suppliers') }}" class="submenu-item">- Proveedores</a>
                     </div>
                 </div>
 
@@ -65,7 +68,7 @@
                     </div>
                 </div>
 
-                <a href="{{ url_for('stats.view_statistics') }}" class="menu-item active">
+                <a href="{{ url_for('stats.view_statistics') }}" class="menu-item">
                     <span class="material-symbols-outlined">bar_chart</span> Estadísticas
                 </a>
 
@@ -74,8 +77,8 @@
                         <span class="material-symbols-outlined">groups</span> Recursos Humanos <span class="arrow"></span>
                     </a>
                     <div class="submenu">
-                        <a href="{{ url_for('workstation.query_workstations') }}" class="submenu-item">- Puestos de Trabajo</a>
-                        <a href="#" class="submenu-item">- Trabajadores</a>
+                        <a href="{{ url_for('job_position.query_job_positions') }}" class="submenu-item">- Puestos de Trabajo</a>
+                        <a href="{{ url_for('worker.query_workers') }}" class="submenu-item">- Trabajadores</a>
                         <a href="#" class="submenu-item">- Nóminas</a>
                     </div>
                 </div>
@@ -85,7 +88,7 @@
         </aside>
 
         <main class="content">
-            <h1 class="page-title">Puestos de Trabajo</h1>
+            <h1 class="page-title">Trabajadores</h1>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -98,18 +101,19 @@
             {% endwith %}
 
             <div class="action-bar">
-                <form action="{{ url_for('workstation.query_workstations') }}" method="GET">
+
+                <form action="{{ url_for('worker.query_workers') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="search" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                        <input type="text" name="worker" placeholder="Cédula, nombre o apellido" class="opcional" value="{{ search_query or '' }}">
                     </div>
                 </form>
                 
-                <button class="btn-register" id="openWorkstationModalBtn">Registrar</button>
+                <button class="btn-register" id="openWorkerModalBtn">Registrar</button>
                 
-                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('workstation.generate_workstations_report') }}">
+                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('worker.generate_worker_report') }}">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
-                    Generar reporte de Puestos de Trabajo
+                    Generar reporte de Trabajadores
                 </a>
             </div>
 
@@ -117,28 +121,36 @@
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Teléfono</th>
                             <th>Puesto de Trabajo</th>
                             <th>Sueldo</th>
                             <th class="text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for workstation in pagination.items %}
+                        {% for worker in pagination.items %}
                             <tr>
-                                <td data-buscar="nombre">{{ workstation.NombrePuestoTrabajo|trim }}</td>
-                                <td>{{ workstation.Sueldo }}</td>
+                                <td>{{ worker.persona.Cedula }}</td>
+                                <td>{{ worker.persona.Nombre|trim }}</td>
+                                <td>{{ worker.persona.Apellido|trim }}</td>
+                                <td>{{ worker.persona.Telefono }}</td>
+                                <td>{{ worker.puesto_trabajo.NombrePuestoTrabajo|trim }}</td>
+                                <td>{{ "%.2f"|format(worker.puesto_trabajo.Sueldo) }}</td>
                                 <td class="text-center">
-                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ workstation.IdPuestoTrabajo }}', '{{ workstation.NombrePuestoTrabajo|trim }}', '{{ workstation.Sueldo }}')">
+                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ worker.IdTrabajador }}', '{{ worker.persona.Cedula }}', '{{ worker.persona.Nombre|trim }}', '{{ worker.persona.Apellido|trim }}', '{{ worker.persona.Telefono }}', '{{ worker.IdPuestoTrabajo }}')">
                                         <span class="material-symbols-outlined">edit</span>Editar
                                     </button>
-                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ workstation.IdPuestoTrabajo }}')">
+                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ worker.IdTrabajador }}')">
                                         <span class="material-symbols-outlined">delete</span>Eliminar
                                     </button>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="3" class="text-center">No se encontraron puestos de trabajo registrados</td>
+                                <td colspan="6" class="text-center">No se encontraron trabajadores registrados</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -147,7 +159,7 @@
 
             <div class="pagination-container">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('workstation.query_workstations', page=pagination.page - 1, search=search_query) }}" class="btn-page">Anterior</a>
+                    <a href="{{ url_for('worker.query_workers', page=pagination.page - 1, worker=search_query) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
@@ -155,7 +167,7 @@
                 <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
 
                 {% if pagination.has_next %}
-                    <a href="{{ url_for('workstation.query_workstations', page=pagination.page + 1, search=search_query) }}" class="btn-page">Siguiente</a>
+                    <a href="{{ url_for('worker.query_workers', page=pagination.page + 1, worker=search_query) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}
@@ -163,60 +175,103 @@
         </main>
     </div>
 
-    <div class="modal-overlay" id="WorkstationModal">
+    <div class="modal-overlay" id="WorkerModal">
         <div class="modal-card">
-            <h2>Registro de Puesto de Trabajo</h2>
-            <form id="WorkstationForm" action="{{ url_for('workstation.register_workstation') }}" method="POST">
+            <h2>Registro de Trabajador</h2>
+            <form id="WorkerForm" action="{{ url_for('worker.register_worker') }}" method="POST">
                 <div class="form-group">
-                    <label for="NombrePuestoTrabajo">Nombre del Puesto</label>
-                    <input type="text" id="NombrePuestoTrabajo" name="Nombre" placeholder="Ingrese el nombre del puesto" data-error="El nombre es obligatorio">
+                    <label for="Cedula">Cédula</label>
+                    <input type="text" id="Cedula" name="Cedula" placeholder="Ingrese la cedula">
                 </div>
+
                 <div class="form-group">
-                    <label for="Sueldo">Sueldo</label>
-                    <input type="text" id="Sueldo" name="Sueldo" placeholder="Ingrese el sueldo" data-error="El sueldo es obligatorio">
+                    <label for="Nombre">Nombre</label>
+                    <input type="text" id="Nombre" name="Nombre" placeholder="Ingrese el nombre" >
+                </div>
+
+                <div class="form-group">
+                    <label for="Apellido">Apellido</label>
+                    <input type="text" id="Apellido" name="Apellido" placeholder="Ingrese el apellido" >
+                </div>
+
+                <div class="form-group">
+                    <label for="Telefono">Teléfono</label>
+                    <input type="text" id="Telefono" name="Telefono" placeholder="Ingrese el numero de teléfono">
+                </div>
+
+                <div class="form-group">
+                    <label for="IdPuestoTrabajo">Puesto de Trabajo</label>
+                    <select id="IdPuestoTrabajo" name="IdPuestoTrabajo" >
+                        <option value="">Seleccione un puesto</option>
+                        {% for pos in positions %}
+                            <option value="{{ pos.IdPuestoTrabajo }}">{{ pos.NombrePuestoTrabajo|trim }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
                 <div class="form-error"></div>
 
                 <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeWorkstationBtn">Cancelar</button>
+                    <button type="button" class="btn-cancel" id="closeWorkerBtn">Cancelar</button>
                     <button type="submit" class="btn-submit">Registrar</button>
                 </div>                
             </form>
         </div>
     </div>
 
-    <div class="modal-overlay" id="UpdateWorkstationModal">
+    <div class="modal-overlay" id="UpdateWorkerModal">
         <div class="modal-card">
-            <h2>Modificar Puesto de Trabajo</h2>
-            <form id="UpdateWorkstationForm" action="" method="POST">
+            <h2>Modificar Trabajador</h2>
+            <form id="UpdateWorkerForm" action="" method="POST">
                 <div class="form-group">
-                    <label for="UpdateNombre">Nombre del Puesto</label>
-                    <input type="text" id="UpdateNombre" name="Nombre" placeholder="Modifique el nombre del puesto">
+                    <label for="UpdateCedula">Cédula</label>
+                    <input type="text" id="UpdateCedula" name="Cedula" placeholder="Modifique la cédula">
                 </div>
+
                 <div class="form-group">
-                    <label for="UpdateSueldo">Sueldo</label>
-                    <input type="text" id="UpdateSueldo" name="Sueldo" placeholder="Modifique el sueldo">
+                    <label for="UpdateNombre">Nombre</label>
+                    <input type="text" id="UpdateNombre" name="Nombre" placeholder="Modifique el nombre">
                 </div>
+
+                <div class="form-group">
+                    <label for="UpdateApellido">Apellido</label>
+                    <input type="text" id="UpdateApellido" name="Apellido" placeholder="Modifique el apellido">
+                </div>
+
+                <div class="form-group">
+                    <label for="UpdateTelefono">Teléfono</label>
+                    <input type="text" id="UpdateTelefono" name="Telefono" placeholder="Modifique el teléfono">
+                </div>
+
+                <div class="form-group">
+                    <label for="UpdateIdPuestoTrabajo">Puesto de Trabajo</label>
+                    <select id="UpdateIdPuestoTrabajo" name="IdPuestoTrabajo">
+                        {% for pos in positions %}
+                            <option value="{{ pos.IdPuestoTrabajo }}">{{ pos.NombrePuestoTrabajo|trim }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <div class="form-error"></div>
+
                 <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeUpdateWorkstationBtn">Cancelar</button>
+                    <button type="button" class="btn-cancel" id="closeUpdateWorkerBtn">Cancelar</button>
                     <button type="submit" class="btn-modify">Guardar Cambios</button>
                 </div>                
             </form>
         </div>
     </div>
 
-    <div class="modal-overlay" id="DeleteWorkstationModal">
+    <div class="modal-overlay" id="DeleteWorkerModal">
         <div class="modal-card">
-            <h2>Eliminar Puesto de Trabajo</h2>
-            <form id="DeleteWorkstationForm" action="" method="POST">
+            <h2>Eliminar Trabajador</h2>
+            <form id="DeleteWorkerForm" action="" method="POST">
                 <div class="form-group">
-                    <p>¿Está seguro de que desea eliminar el puesto de trabajo?</p>
+                    <p>¿Está seguro de que desea eliminar a este trabajador?</p>
                 </div>
                 
                 <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeDeleteWorkstationBtn">Cancelar</button>
+                    <button type="button" class="btn-cancel" id="closeDeleteWorkerBtn">Cancelar</button>
                     <button type="submit" class="btn-delete">Eliminar</button>
                 </div>                
             </form>
