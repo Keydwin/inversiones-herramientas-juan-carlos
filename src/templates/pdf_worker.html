@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Trabajadores</title>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Trabajadores</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Puesto de Trabajo</th>
+                <th>Sueldo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for worker in workers %}
+            <tr>
+                <td>{{ worker.persona.Cedula }}</td>
+                <td>{{ worker.persona.Nombre|trim }} {{ worker.persona.Apellido|trim }}</td>
+                <td>{{ worker.persona.Apellido|trim }}</td>
+                <td>{{ worker.persona.Telefono }}</td>
+                <td>{{ worker.puesto_trabajo.NombrePuestoTrabajo|trim }}</td>
+                <td>{{ "%.2f"|format(worker.puesto_trabajo.Sueldo) }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center;">No hay trabajadores registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

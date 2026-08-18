@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marcas</title>
+    <title>Trabajadores</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/trademark.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/worker.js') }}"></script>
 </head>
 <body>
+
     <header class="topbar">
         <div class="left-section">
             <button class="menu-toggle" id="menuToggle">
@@ -28,6 +29,7 @@
     </header>
 
     <div class="main-container">
+
         <aside class="sidebar collapsed" id="sidebar">
             <nav class="menu-nav">
                 <div class="menu-dropdown">
@@ -86,7 +88,7 @@
         </aside>
 
         <main class="content">
-            <h1 class="page-title">Marcas</h1>
+            <h1 class="page-title">Trabajadores</h1>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -99,18 +101,19 @@
             {% endwith %}
 
             <div class="action-bar">
-                <form action="{{ url_for('trademark.query_trademarks') }}" method="GET">
+
+                <form action="{{ url_for('worker.query_workers') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="trademark" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                        <input type="text" name="worker" placeholder="Cédula, nombre o apellido" class="opcional" value="{{ search_query or '' }}">
                     </div>
                 </form>
                 
-                <button class="btn-register" id="openTrademarkModalBtn">Registrar</button>
+                <button class="btn-register" id="openWorkerModalBtn">Registrar</button>
                 
-                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('trademark.generate_trademark_report') }}">
+                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('worker.generate_worker_report') }}">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
-                    Generar reporte de Marcas
+                    Generar reporte de Trabajadores
                 </a>
             </div>
 
@@ -118,26 +121,36 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Marca</th>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Teléfono</th>
+                            <th>Puesto de Trabajo</th>
+                            <th>Sueldo</th>
                             <th class="text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for trademark in pagination.items %}
+                        {% for worker in pagination.items %}
                             <tr>
-                                <td data-buscar="nombre">{{ trademark.Marca|trim }}</td>
+                                <td>{{ worker.persona.Cedula }}</td>
+                                <td>{{ worker.persona.Nombre|trim }}</td>
+                                <td>{{ worker.persona.Apellido|trim }}</td>
+                                <td>{{ worker.persona.Telefono }}</td>
+                                <td>{{ worker.puesto_trabajo.NombrePuestoTrabajo|trim }}</td>
+                                <td>{{ "%.2f"|format(worker.puesto_trabajo.Sueldo) }}</td>
                                 <td class="text-center">
-                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ trademark.IdMarca }}', '{{ trademark.Marca|trim }}')">
+                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ worker.IdTrabajador }}', '{{ worker.persona.Cedula }}', '{{ worker.persona.Nombre|trim }}', '{{ worker.persona.Apellido|trim }}', '{{ worker.persona.Telefono }}', '{{ worker.IdPuestoTrabajo }}')">
                                         <span class="material-symbols-outlined">edit</span>Editar
                                     </button>
-                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ trademark.IdMarca }}')">
+                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ worker.IdTrabajador }}')">
                                         <span class="material-symbols-outlined">delete</span>Eliminar
                                     </button>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="1" class="text-center">No se encontraron marcas registradas</td>
+                                <td colspan="6" class="text-center">No se encontraron trabajadores registrados</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -146,7 +159,7 @@
 
             <div class="pagination-container">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page - 1, trademark=search_query) }}" class="btn-page">Anterior</a>
+                    <a href="{{ url_for('worker.query_workers', page=pagination.page - 1, worker=search_query) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
@@ -154,7 +167,7 @@
                 <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
 
                 {% if pagination.has_next %}
-                    <a href="{{ url_for('trademark.query_trademarks', page=pagination.page + 1, trademark=search_query) }}" class="btn-page">Siguiente</a>
+                    <a href="{{ url_for('worker.query_workers', page=pagination.page + 1, worker=search_query) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}
@@ -162,53 +175,104 @@
         </main>
     </div>
 
-    <div class="modal-overlay" id="TrademarkModal">
+    <div class="modal-overlay" id="WorkerModal">
         <div class="modal-card">
-            <h2>Registro de Marca</h2>
-            <form id="TrademarkForm" action="{{ url_for('trademark.register_trademark') }}" method="POST">
+            <h2>Registro de Trabajador</h2>
+            <form id="WorkerForm" action="{{ url_for('worker.register_worker') }}" method="POST">
                 <div class="form-group">
-                    <label for="Marca">Nombre de la Marca</label>
-                    <input type="text" id="Marca" name="Marca" placeholder="Ingrese el nombre de la marca" data-error="El nombre es obligatorio">
+                    <label for="Cedula">Cédula</label>
+                    <input type="text" id="Cedula" name="Cedula" placeholder="Ingrese la cedula">
+                </div>
+
+                <div class="form-group">
+                    <label for="Nombre">Nombre</label>
+                    <input type="text" id="Nombre" name="Nombre" placeholder="Ingrese el nombre" >
+                </div>
+
+                <div class="form-group">
+                    <label for="Apellido">Apellido</label>
+                    <input type="text" id="Apellido" name="Apellido" placeholder="Ingrese el apellido" >
+                </div>
+
+                <div class="form-group">
+                    <label for="Telefono">Teléfono</label>
+                    <input type="text" id="Telefono" name="Telefono" placeholder="Ingrese el numero de teléfono">
+                </div>
+
+                <div class="form-group">
+                    <label for="IdPuestoTrabajo">Puesto de Trabajo</label>
+                    <select id="IdPuestoTrabajo" name="IdPuestoTrabajo" >
+                        <option value="">Seleccione un puesto</option>
+                        {% for pos in positions %}
+                            <option value="{{ pos.IdPuestoTrabajo }}">{{ pos.NombrePuestoTrabajo|trim }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
                 <div class="form-error"></div>
 
                 <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeTrademarkBtn">Cancelar</button>
+                    <button type="button" class="btn-cancel" id="closeWorkerBtn">Cancelar</button>
                     <button type="submit" class="btn-submit">Registrar</button>
                 </div>                
             </form>
         </div>
     </div>
 
-    <div class="modal-overlay" id="UpdateTrademarkModal">
+    <div class="modal-overlay" id="UpdateWorkerModal">
         <div class="modal-card">
-            <h2>Modificar Marca</h2>
-            <form id="UpdateTrademarkForm" action="" method="POST">
+            <h2>Modificar Trabajador</h2>
+            <form id="UpdateWorkerForm" action="" method="POST">
                 <div class="form-group">
-                    <label for="UpdateTrademark">Nombre de la Marca</label>
-                    <input type="text" id="UpdateTrademark" name="Marca" placeholder="Modifique el nombre de la marca">
+                    <label for="UpdateCedula">Cédula</label>
+                    <input type="text" id="UpdateCedula" name="Cedula" placeholder="Modifique la cédula">
                 </div>
+
+                <div class="form-group">
+                    <label for="UpdateNombre">Nombre</label>
+                    <input type="text" id="UpdateNombre" name="Nombre" placeholder="Modifique el nombre">
+                </div>
+
+                <div class="form-group">
+                    <label for="UpdateApellido">Apellido</label>
+                    <input type="text" id="UpdateApellido" name="Apellido" placeholder="Modifique el apellido">
+                </div>
+
+                <div class="form-group">
+                    <label for="UpdateTelefono">Teléfono</label>
+                    <input type="text" id="UpdateTelefono" name="Telefono" placeholder="Modifique el teléfono">
+                </div>
+
+                <div class="form-group">
+                    <label for="UpdateIdPuestoTrabajo">Puesto de Trabajo</label>
+                    <select id="UpdateIdPuestoTrabajo" name="IdPuestoTrabajo">
+                        {% for pos in positions %}
+                            <option value="{{ pos.IdPuestoTrabajo }}">{{ pos.NombrePuestoTrabajo|trim }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <div class="form-error"></div>
+
                 <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeUpdateTrademarkBtn">Cancelar</button>
+                    <button type="button" class="btn-cancel" id="closeUpdateWorkerBtn">Cancelar</button>
                     <button type="submit" class="btn-modify">Guardar Cambios</button>
                 </div>                
             </form>
         </div>
     </div>
 
-    <div class="modal-overlay" id="DeleteTrademarkModal">
+    <div class="modal-overlay" id="DeleteWorkerModal">
         <div class="modal-card">
-            <h2>Eliminar Marca</h2>
-            <form id="DeleteTrademarkForm" action="" method="POST">
+            <h2>Eliminar Trabajador</h2>
+            <form id="DeleteWorkerForm" action="" method="POST">
                 <div class="form-group">
-                    <p>¿Está seguro de que desea eliminar la marca?</p>
+                    <p>¿Está seguro de que desea eliminar a este trabajador?</p>
                 </div>
                 
                 <div class="actions">
-                    <button type="button" class="btn-cancel" id="closeDeleteTrademarkBtn">Cancelar</button>
-                    <button type="submit" class="btn-delete"">Eliminar</button>
+                    <button type="button" class="btn-cancel" id="closeDeleteWorkerBtn">Cancelar</button>
+                    <button type="submit" class="btn-delete">Eliminar</button>
                 </div>                
             </form>
         </div>

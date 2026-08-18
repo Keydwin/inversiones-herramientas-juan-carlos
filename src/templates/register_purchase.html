@@ -36,38 +36,52 @@
         <aside class="sidebar collapsed" id="sidebar">
             <nav class="menu-nav">
                 <div class="menu-dropdown">
-                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">point_of_sale</span> Ventas <span class="arrow"></span></a>
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">point_of_sale</span> Ventas <span class="arrow"></span>
+                    </a>
                     <div class="submenu">
                         <a href="#" class="submenu-item">- Venta</a>
                         <a href="#" class="submenu-item">- Entregas</a>
+                        <a href="#" class="submenu-item">- Clientes</a>
                     </div>
                 </div>
 
-                <a href="{{ url_for('buy.query_purchases') }}" class="menu-item"><span class="material-symbols-outlined">shopping_cart</span> Compras</a>
+                <a href="{{ url_for('buy.query_purchases') }}" class="menu-item">
+                    <span class="material-symbols-outlined">shopping_cart</span> Compras
+                </a>
 
                 <div class="menu-dropdown">
-                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">inventory_2</span>Inventario<span class="arrow"></span></a>
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">inventory_2</span> Inventario <span class="arrow"></span>
+                    </a>
                     <div class="submenu">
                         <a href="#" class="submenu-item">- Inventario</a>
                         <a href="{{ url_for('trademark.query_trademarks') }}" class="submenu-item">- Marcas</a>
                         <a href="{{ url_for('product.query_products') }}" class="submenu-item">- Productos</a>
+                        <a href="{{ url_for('supplier.query_suppliers') }}" class="submenu-item">- Proveedores</a>
                     </div>
                 </div>
 
                 <div class="menu-dropdown">
-                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">menu_book</span> Contabilidad <span class="arrow"></span></a>
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">menu_book</span> Contabilidad <span class="arrow"></span>
+                    </a>
                     <div class="submenu">
                         <a href="#" class="submenu-item">- Libro Diario</a>
                     </div>
                 </div>
 
-                <a href="#" class="menu-item"><span class="material-symbols-outlined">bar_chart</span> Estadísticas</a>
+                <a href="{{ url_for('stats.view_statistics') }}" class="menu-item">
+                    <span class="material-symbols-outlined">bar_chart</span> Estadísticas
+                </a>
 
                 <div class="menu-dropdown">
-                    <a href="#" class="menu-item dropdown-toggle"><span class="material-symbols-outlined">groups</span> Recursos Humanos <span class="arrow"></span></a>
+                    <a href="#" class="menu-item dropdown-toggle">
+                        <span class="material-symbols-outlined">groups</span> Recursos Humanos <span class="arrow"></span>
+                    </a>
                     <div class="submenu">
-                        <a href="#" class="submenu-item">- Puestos de Trabajos</a>
-                        <a href="#" class="submenu-item">- Trabajadores</a>
+                        <a href="{{ url_for('job_position.query_job_positions') }}" class="submenu-item">- Puestos de Trabajo</a>
+                        <a href="{{ url_for('worker.query_workers') }}" class="submenu-item">- Trabajadores</a>
                         <a href="#" class="submenu-item">- Nóminas</a>
                     </div>
                 </div>
