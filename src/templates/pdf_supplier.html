@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Proveedores</title>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Proveedores</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Nombre del Proveedor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in suppliers %}
+            <tr>
+                <td>{{ s.NombreProveedor|trim }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td style="text-align: center;">No hay proveedores registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

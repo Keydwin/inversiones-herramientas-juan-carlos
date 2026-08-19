@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Trabajadores</title>
+</head>
+<body onload="window.print()">
+
+    <h2>Reporte de Trabajadores</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Puesto de Trabajo</th>
+                <th>Sueldo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in trabajadores %}
+            {% set p = t.Persona or t.persona %}
+            {% set p_cedula = p.Cedula or p.cedula if p else "" %}
+            {% set p_nombre = p.Nombre or p.nombre if p else "" %}
+            {% set p_apellido = p.Apellido or p.apellido if p else "" %}
+
+            {% set raw_tel = (p.Telefono or p.telefono or "")|string %}
+            {% set p_telefono = ("04" ~ raw_tel) if raw_tel|length == 9 else raw_tel %}
+
+            {% set id_puest = t.IdPuestoTrabajo or t.idPuestoTrabajo or "" %}
+            {% set puesto_obj = t.PuestoTrabajo or t.puestotrabajo %}
+            {% set ns = namespace(puesto_nombre="N/D") %}
+
+            {% if puesto_obj %}
+                {% set ns.puesto_nombre = puesto_obj.Nombre or puesto_obj.nombre or puesto_obj.NombrePuesto or puesto_obj.Descripcion %}
+            {% elif id_puest and puestos %}
+                {% for p_item in puestos %}
+                    {% if (p_item.IdPuestoTrabajo or p_item.idPuestoTrabajo or p_item.id)|string == id_puest|string %}
+                        {% set ns.puesto_nombre = p_item.Nombre or p_item.nombre or p_item.NombrePuesto or p_item.Descripcion %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {% set sueldo_v = t.Sueldo if t.Sueldo is not none else (t.sueldo if t.sueldo is not none else "N/D") %}
+
+            <tr>
+                <td>{{ p_cedula }}</td>
+                <td>{{ p_nombre }}</td>
+                <td>{{ p_apellido }}</td>
+                <td>{{ p_telefono }}</td>
+                <td>{{ ns.puesto_nombre }}</td>
+                <td>{{ sueldo_v }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #777;">No se encontraron registros</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="no-print">
+        <button class="btn btn-print" onclick="window.print()">Imprimir / Guardar PDF</button>
+        <button class="btn btn-close" onclick="window.close()">Cerrar pestaña</button>
+    </div>
+
+</body>
+</html>

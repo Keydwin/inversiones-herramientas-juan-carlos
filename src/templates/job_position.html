@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleccionar Proveedor</title>
+    <title>Puestos de Trabajo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/buy.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/job_position.js') }}"></script>
 </head>
 <body>
+    <!-- Topbar navigation header -->
     <header class="topbar">
         <div class="left-section">
             <button class="menu-toggle" id="menuToggle">
@@ -86,7 +87,7 @@
         </aside>
 
         <main class="content">
-            <h1 class="page-title">Seleccionar Proveedor</h1>
+            <h1 class="page-title">Puestos de Trabajo</h1>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -99,17 +100,18 @@
             {% endwith %}
 
             <div class="action-bar">
-                <form action="{{ url_for('buy.select_provider_page') }}" method="GET">
+                <form action="{{ url_for('job_position.query_job_positions') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="supplier" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                        <input type="text" name="job_position" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
                     </div>
-                    <button type="submit" style="display: none;"></button>
                 </form>
-
-                <a class="btn-report" href="{{ url_for('buy.query_purchases') }}">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    Cancelar
+                
+                <button class="btn-register" id="openJobPositionModalBtn">Registrar</button>
+                
+                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('job_position.generate_job_position_report') }}">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    Generar reporte de Puestos
                 </a>
             </div>
 
@@ -117,47 +119,115 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Proveedor</th>
-                            <th>Acción</th>
+                            <th>Nombre del Puesto</th>
+                            <th>Sueldo</th>
+                            <th class="text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for prov in proveedores_pagination.items %}
-                        <tr>
-                            <td>{{ prov.NombreProveedor }}</td>
-                            <td>
-                                <form action="{{ url_for('buy.save_provider_session', id_proveedor=prov.IdProveedor) }}" method="POST">
-                                    <button type="submit" class="action-btn select-btn" style="cursor: pointer;">
-                                        <span class="material-symbols-outlined">person</span> Seleccionar
+                        {% for position in pagination.items %}
+                            <tr>
+                                <td>{{ position.NombrePuestoTrabajo|trim }}</td>
+                                <td>{{ "%.2f"|format(position.Sueldo) }}</td>
+                                <td class="text-center">
+                                    <button class="action-btn edit-btn" onclick="openUpdateModal('{{ position.IdPuestoTrabajo }}', '{{ position.NombrePuestoTrabajo|trim }}', '{{ position.Sueldo }}')">
+                                        <span class="material-symbols-outlined">edit</span>Editar
                                     </button>
-                                </form>
-                            </td>
-                        </tr>
+                                    <button class="action-btn delete-btn" onclick="openDeleteModal('{{ position.IdPuestoTrabajo }}')">
+                                        <span class="material-symbols-outlined">delete</span>Eliminar
+                                    </button>
+                                </td>
+                            </tr>
                         {% else %}
-                        <tr>
-                            <td colspan="2" class="text-center">No se encontraron proveedores registrados</td>
-                        </tr>
+                            <tr>
+                                <td colspan="3" class="text-center">No se encontraron puestos de trabajo registrados</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
             <div class="pagination-container">
-                {% if proveedores_pagination.has_prev %}
-                    <a href="{{ url_for('buy.select_provider_page', page=proveedores_pagination.prev_num, supplier=search_query) }}" class="btn-page">Anterior</a>
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('job_position.query_job_positions', page=pagination.page - 1, job_position=search_query) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
 
-                <span class="page-indicator">Página {{ proveedores_pagination.page }} de {{ proveedores_pagination.pages if proveedores_pagination.pages > 0 else 1 }}</span>
+                <span class="page-indicator">Página {{ pagination.page }} de {{ pagination.pages if pagination.pages > 0 else 1 }}</span>
 
-                {% if proveedores_pagination.has_next %}
-                    <a href="{{ url_for('buy.select_provider_page', page=proveedores_pagination.next_num, supplier=search_query) }}" class="btn-page">Siguiente</a>
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('job_position.query_job_positions', page=pagination.page + 1, job_position=search_query) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}
             </div>
         </main>
     </div>
+
+    <div class="modal-overlay" id="JobPositionModal">
+        <div class="modal-card">
+            <h2>Registro de Puesto de Trabajo</h2>
+            <form id="JobPositionForm" action="{{ url_for('job_position.register_job_position') }}" method="POST">
+                <div class="form-group">
+                    <label for="NombrePuestoTrabajo">Nombre del Puesto</label>
+                    <input type="text" id="NombrePuestoTrabajo" name="NombrePuestoTrabajo" placeholder="Ingrese el nombre del puesto">
+                </div>
+
+                <div class="form-group">
+                    <label for="Sueldo">Sueldo</label>
+                    <input type="text" id="Sueldo" name="Sueldo" placeholder="Ingrese el sueldo del puesto">
+                </div>
+                
+                <div class="form-error"></div>
+
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeJobPositionBtn">Cancelar</button>
+                    <button type="submit" class="btn-submit">Registrar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="UpdateJobPositionModal">
+        <div class="modal-card">
+            <h2>Modificar Puesto de Trabajo</h2>
+            <form id="UpdateJobPositionForm" action="" method="POST">
+                <div class="form-group">
+                    <label for="UpdateNombrePuestoTrabajo">Nombre del Puesto</label>
+                    <input type="text" id="UpdateNombrePuestoTrabajo" name="NombrePuestoTrabajo" placeholder="Ingrese el nombre del puesto">
+                </div>
+
+                <div class="form-group">
+                    <label for="UpdateSueldo">Sueldo</label>
+                    <input type="text" id="UpdateSueldo" name="Sueldo" placeholder="Ingrese el sueldo del puesto">
+                </div>
+
+                <div class="form-error"></div>
+
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeUpdateJobPositionBtn">Cancelar</button>
+                    <button type="submit" class="btn-modify">Guardar Cambios</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="DeleteJobPositionModal">
+        <div class="modal-card">
+            <h2>Eliminar Puesto de Trabajo</h2>
+            <form id="DeleteJobPositionForm" action="" method="POST">
+                <div class="form-group">
+                    <p>¿Está seguro de que desea eliminar el puesto de trabajo?</p>
+                </div>
+                
+                <div class="actions">
+                    <button type="button" class="btn-cancel" id="closeDeleteJobPositionBtn">Cancelar</button>
+                    <button type="submit" class="btn-delete">Eliminar</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>
