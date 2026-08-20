@@ -48,6 +48,7 @@ body {
     border: none;
     color: white;
     cursor: pointer;
+    text-decoration: none;
     display: flex;
     align-items: center;
     transition: opacity 0.2s;

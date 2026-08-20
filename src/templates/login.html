@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
+</head>
+
+<body>
+    <div class="login-box">
+        
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm" method="POST">
+            <label for="usuario" class="form-label">Usuario</label>
+            <input type="text" id="usuario" name="usuario" placeholder="Ingresar Usuario">
+
+            <label for="contraseña" class="form-label">Contraseña</label>
+            <input type="password" id="contraseña" name="contraseña" placeholder="Ingresar Contraseña">
+
+            <button type="submit">Ingresar</button>
+            <p class="error" id="errorMsg"></p>
+        </form>
+    </div>
+</body>
+</html>
