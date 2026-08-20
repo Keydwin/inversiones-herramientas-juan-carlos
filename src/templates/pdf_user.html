@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Usuarios</title>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Usuarios</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Trabajador </th>
+                <th>Cédula</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.NombreUsuario|trim }}</td>
+                <td>{{ u.trabajador.persona.Nombre|trim }} {{ u.trabajador.persona.Apellido|trim }}</td>
+                <td>V-{{ u.trabajador.persona.Cedula }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

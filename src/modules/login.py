@@ -1,18 +1,17 @@
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from models import Usuario
 
-# Blueprint for authentication routes
 login_blueprint = Blueprint('login', __name__)
 
 def _obtener_credenciales():
     """Get credentials from JSON or HTML form."""
     if request.is_json:
         data = request.get_json(silent=True) or {}
-        username = (data.get('usuario') or '').strip()
+        username = (data.get('usuario') or data.get('NombreUsuario') or '').strip()
         password = (data.get('password') or data.get('contraseña') or '').strip()
         return username, password
 
-    username = (request.form.get('usuario') or '').strip()
+    username = (request.form.get('usuario') or request.form.get('NombreUsuario') or '').strip()
     password = (request.form.get('password') or request.form.get('contraseña') or '').strip()
     return username, password
 
@@ -20,7 +19,6 @@ def _obtener_credenciales():
 @login_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     """Render login page and authenticate user."""
-    # Redirect if session is already active
     if session.get('usuario_id') and request.method == 'GET':
         return redirect(url_for('product.query_products'))
 
@@ -29,16 +27,14 @@ def login():
 
     username, password = _obtener_credenciales()
 
-    # Check for empty fields
     if not username or not password:
         if request.is_json:
             return jsonify({'success': False, 'error': 'Debe llenar todos los campos.'}), 400
         return render_template('login.html')
 
-    # Fetch user from database
     usuario_db = Usuario.query.filter_by(NombreUsuario=username).first()
 
-    # Validate credentials
+    # Comparación directa de texto plano sin encriptación
     if usuario_db and usuario_db.password.strip() == password:
         session.clear()
         session['usuario_id'] = usuario_db.IdUsuario
@@ -46,7 +42,6 @@ def login():
 
         if request.is_json:
             return jsonify({'success': True, 'redirect': url_for('product.query_products')})
-
 
         return redirect(url_for('product.query_products'))
 
@@ -72,5 +67,4 @@ def requerir_login():
         if not session.get('usuario_id'):
             if request.is_json:
                 return jsonify({'success': False}), 401
-            # Direct redirect with no message
             return redirect(url_for('login.login'))
