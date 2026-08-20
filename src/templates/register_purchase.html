@@ -24,10 +24,10 @@
             </button>
         </div>
         <div class="user-section">
-            <div class="user-badge">Usuario: ******</div>
-            <button class="logout-btn">
+            <div class="user-badge">Usuario: {{ session.get('usuario') }}</div>
+            <a href="{{ url_for('login.logout') }}" class="logout-btn" title="Cerrar sesión">
                 <span class="material-symbols-outlined">logout</span>
-            </button>
+            </a>
         </div>
     </header>
 

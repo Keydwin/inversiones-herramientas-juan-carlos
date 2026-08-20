@@ -23,7 +23,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # We registered the blueprint in the central application
-app.register_blueprint(login_blueprint)
+
 app.register_blueprint(trademark_blueprint)
 app.register_blueprint(product_blueprint)
 app.register_blueprint(buy_blueprint)
@@ -31,6 +31,7 @@ app.register_blueprint(stats_blueprint)
 app.register_blueprint(job_position_blueprint)
 app.register_blueprint(worker_blueprint)
 app.register_blueprint(supplier_blueprint)
+app.register_blueprint(login_blueprint)
 
 # PostgreSQL tables are created if they are not already created
 with app.app_context():

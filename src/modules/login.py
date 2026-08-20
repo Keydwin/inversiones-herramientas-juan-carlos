@@ -1,80 +1,76 @@
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from models import Usuario
 
-# We created the blueprint to handle all authentication routes.
+# Blueprint for authentication routes
 login_blueprint = Blueprint('login', __name__)
-def _obtener_credenciales():
-    """Obtiene las credenciales desde JSON o desde el formulario HTML."""
-    if request.is_json:
-        datos = request.get_json(silent=True) or {}
-        usuario = (datos.get('usuario') or '').strip()
-        password = (datos.get('password') or datos.get('contraseña') or '').strip()
-        return usuario, password
 
-    usuario = (request.form.get('usuario') or '').strip()
+def _obtener_credenciales():
+    """Get credentials from JSON or HTML form."""
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+        username = (data.get('usuario') or '').strip()
+        password = (data.get('password') or data.get('contraseña') or '').strip()
+        return username, password
+
+    username = (request.form.get('usuario') or '').strip()
     password = (request.form.get('password') or request.form.get('contraseña') or '').strip()
-    return usuario, password
+    return username, password
 
 
 @login_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
-    """Muestra la vista de inicio de sesión y valida al usuario."""
-    # If there is already an active session, it does not allow returning to the login
+    """Render login page and authenticate user."""
+    # Redirect if session is already active
     if session.get('usuario_id') and request.method == 'GET':
         return redirect(url_for('product.query_products'))
 
     if request.method == 'GET':
         return render_template('login.html')
 
-    usuario, password = _obtener_credenciales()
+    username, password = _obtener_credenciales()
 
-    # Basic validation of empty fields
-    if not usuario or not password:
+    # Check for empty fields
+    if not username or not password:
         if request.is_json:
-            return jsonify({
-                'success': False,
-                'error': 'Debe llenar todos los campos.'
-            }), 400
-
-        flash('Debe llenar todos los campos.', 'danger')
+            return jsonify({'success': False, 'error': 'Debe llenar todos los campos.'}), 400
         return render_template('login.html')
 
-    # We search for the user in the usuario table using the NombreUsuario field
-    usuario_db = Usuario.query.filter_by(NombreUsuario=usuario).first()
+    # Fetch user from database
+    usuario_db = Usuario.query.filter_by(NombreUsuario=username).first()
 
-    # Validation of user and password
-    if usuario_db and usuario_db.password == password:
+    # Validate credentials
+    if usuario_db and usuario_db.password.strip() == password:
         session.clear()
         session['usuario_id'] = usuario_db.IdUsuario
-        session['usuario'] = usuario_db.NombreUsuario
+        session['usuario'] = usuario_db.NombreUsuario.strip() if usuario_db.NombreUsuario else usuario_db.NombreUsuario
 
         if request.is_json:
-            return jsonify({
-                'success': True,
-                'redirect': url_for('product.query_products')
-            })
+            return jsonify({'success': True, 'redirect': url_for('product.query_products')})
 
-        flash('Inicio de sesión correcto.', 'success')
+
         return redirect(url_for('product.query_products'))
 
     if request.is_json:
-        return jsonify({
-            'success': False,
-            'error': 'Usuario o contraseña incorrectos.'
-        }), 401
+        return jsonify({'success': False, 'error': 'Usuario o contraseña incorrectos.'}), 401
 
-    flash('Usuario o contraseña incorrectos.', 'danger')
     return render_template('login.html')
 
-# The logout is recorded here.
+
 @login_blueprint.route('/logout', methods=['GET', 'POST'])
 def logout():
-    """Cierra la sesión del usuario y lo devuelve al login."""
+    """Clear user session and redirect to login."""
     session.clear()
-    flash('Sesión cerrada correctamente.', 'info')
     return redirect(url_for('login.login'))
 
 
-if __name__ == '__main__':
-    from app import app
-    app.run(debug=True)
+@login_blueprint.before_app_request
+def requerir_login():
+    """Protect routes silently without flash messages."""
+    public_endpoints = ['login.login', 'static']
+
+    if request.endpoint and request.endpoint not in public_endpoints:
+        if not session.get('usuario_id'):
+            if request.is_json:
+                return jsonify({'success': False}), 401
+            # Direct redirect with no message
+            return redirect(url_for('login.login'))
