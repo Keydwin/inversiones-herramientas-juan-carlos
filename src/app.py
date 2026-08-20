@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from models import db
 
 # We imported the blueprint from the .py files
@@ -32,6 +32,11 @@ app.register_blueprint(job_position_blueprint)
 app.register_blueprint(worker_blueprint)
 app.register_blueprint(supplier_blueprint)
 app.register_blueprint(login_blueprint)
+
+# We define the index route to redirect to the login page
+@app.route('/')
+def index():
+    return redirect(url_for('login.login'))
 
 # PostgreSQL tables are created if they are not already created
 with app.app_context():

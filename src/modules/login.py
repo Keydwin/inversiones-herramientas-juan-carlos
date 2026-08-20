@@ -1,5 +1,5 @@
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
-from models import Usuario
+from models import db, Usuario
 
 # Blueprint for authentication routes
 login_blueprint = Blueprint('login', __name__)
@@ -36,7 +36,7 @@ def login():
         return render_template('login.html')
 
     # Fetch user from database
-    usuario_db = Usuario.query.filter_by(NombreUsuario=username).first()
+    usuario_db = Usuario.query.filter(db.func.trim(Usuario.NombreUsuario) == username).first()
 
     # Validate credentials
     if usuario_db and usuario_db.password.strip() == password:
