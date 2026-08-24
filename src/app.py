@@ -11,6 +11,7 @@ from modules.worker import worker_blueprint
 from modules.supplier import supplier_blueprint
 from modules.login import login_blueprint
 from modules.user import user_blueprint
+from modules.client import client_blueprint
 
 app = Flask(__name__)
 
@@ -34,6 +35,7 @@ app.register_blueprint(worker_blueprint)
 app.register_blueprint(supplier_blueprint)
 app.register_blueprint(login_blueprint)
 app.register_blueprint(user_blueprint)
+app.register_blueprint(client_blueprint)
 
 # PostgreSQL tables are created if they are not already created
 with app.app_context():

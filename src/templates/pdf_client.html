@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Clientes</title>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Clientes</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Estado</th>
+                <th>Municipio</th>
+                <th>Parroquia</th>
+                <th>Dirección</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in clients %}
+            <tr>
+                <td>{{ c.persona.Cedula }}</td>
+                <td>{{ c.persona.Nombre|trim }}</td>
+                <td>{{ c.persona.Apellido|trim }}</td>
+                <td>{{ c.persona.Telefono }}</td>
+                <td>{{ c.parroquia.municipio.estado.Estado|trim }}</td>
+                <td>{{ c.parroquia.municipio.Municipio|trim }}</td>
+                <td>{{ c.parroquia.Parroquia|trim }}</td>
+                <td>{{ c.Direccion|trim }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" style="text-align: center;">No hay clientes registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

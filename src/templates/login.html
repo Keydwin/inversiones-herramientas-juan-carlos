@@ -10,19 +10,25 @@
 </head>
 
 <body>
-    <div class="login-box">
-        
-        <h2>Iniciar Sesión</h2>
-        <form id="loginForm" method="POST">
-            <label for="usuario" class="form-label">Usuario</label>
-            <input type="text" id="usuario" name="usuario" placeholder="Ingresar Usuario">
+    <div class="login-wrapper">
+        <div class="login-box">
+            <div class="logo-container">
+                <h2>Iniciar Sesión</h2>
+            </div>
+            
+            <form id="loginForm" method="POST">
+                <div class="input-group">
+                    <input type="text" id="usuario" name="usuario" placeholder="Ingresar Usuario">
+                </div>
 
-            <label for="contraseña" class="form-label">Contraseña</label>
-            <input type="password" id="contraseña" name="contraseña" placeholder="Ingresar Contraseña">
+                <div class="input-group">
+                    <input type="password" id="contraseña" name="contraseña" placeholder="Ingresar Contraseña">
+                </div>
 
-            <button type="submit">Ingresar</button>
-            <p class="error" id="errorMsg"></p>
-        </form>
+                <button type="submit">Entrar</button>
+                <p class="error" id="errorMsg"></p>
+            </form>
+        </div>
     </div>
 </body>
 </html>
