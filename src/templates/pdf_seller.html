@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte Personal de Ventas</title>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Ventas Personal</div>
+            </td>
+        </tr>
+    </table>
+
+    {% if trabajador %}
+    <div style="margin-bottom: 15px;">
+        <strong>Vendedor:</strong> {{ trabajador.persona.Nombre }} {{ trabajador.persona.Apellido }} | 
+        <strong>Cédula:</strong> {{ trabajador.persona.Cedula }}<br>
+        <strong>Total de Ventas Realizadas:</strong> {{ ventas|length }} | 
+        <strong>Monto Total Acumulado:</strong> {{ "%.2f"|format(ventas|sum(attribute='MontoTotal')|float) }}
+    </div>
+    {% endif %}
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Cédula</th>
+                <th>Cliente</th>
+                <th>Método de Pago</th>
+                <th>Monto Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta.FechaVenta.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ venta.cliente.persona.Cedula }}</td>
+                    <td>{{ venta.cliente.persona.Nombre }} {{ venta.cliente.persona.Apellido }}</td>
+                    <td>{{ venta.MetodoPago }}</td>
+                    <td>{{ "%.2f"|format(venta.MontoTotal|float) }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No registra ventas asignadas en este período.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+</body>
+</html>

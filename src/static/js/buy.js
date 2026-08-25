@@ -141,13 +141,7 @@ document.addEventListener('submit', (e) => {
         }
     });
 
-    const tbodyDetalle = currentForm.querySelector('#tbodyDetalleNuevaCompra');
-    if (tbodyDetalle) {
-        const filasProductos = tbodyDetalle.querySelectorAll('.item-compra-row');
-        if (filasProductos.length === 0) {
-            isFormInvalid = true;
-        }
-    }
+    
 
     if (isFormInvalid) {
         e.preventDefault();

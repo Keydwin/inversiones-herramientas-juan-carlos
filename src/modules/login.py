@@ -39,7 +39,7 @@ def login():
         session.clear()
         session['usuario_id'] = usuario_db.IdUsuario
         session['usuario'] = usuario_db.NombreUsuario.strip() if usuario_db.NombreUsuario else usuario_db.NombreUsuario
-
+        session['id_trabajador'] = usuario_db.IdTrabajador
         if request.is_json:
             return jsonify({'success': True, 'redirect': url_for('product.query_products')})
 
