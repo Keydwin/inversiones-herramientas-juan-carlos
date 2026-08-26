@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Entregas</title>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Entregas de Ventas</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fecha de Entrega</th>
+                <th>Estatus</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entrega in deliveries %}
+            <tr>
+                <td>{{ entrega.FechaEntrega.strftime('%d/%m/%Y')}}</td>
+                <td>{{ entrega.Estatus|trim }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">No se encontraron entregas registradas</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

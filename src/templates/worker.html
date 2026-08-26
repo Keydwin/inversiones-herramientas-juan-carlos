@@ -38,7 +38,7 @@
                     </a>
                     <div class="submenu">
                         <a href="{{ url_for('sell.query_sales') }}" class="submenu-item">- Venta</a>
-                        <a href="#" class="submenu-item">- Entregas</a>
+                        <a href="{{ url_for('delivery.query_deliveries') }}" class="submenu-item">- Entregas</a>
                         <a href="{{ url_for('client.query_clients') }}" class="submenu-item">- Clientes</a>
                     </div>
                 </div>
@@ -111,7 +111,7 @@
                 
                 <button class="btn-register" id="openWorkerModalBtn">Registrar</button>
                 
-                <a class="btn-report" id="btnGenerarPdf" href="{{ url_for('worker.generate_worker_report') }}">
+                <a class="btn-report" id="btnGenerarPdf" target="_self" href="{{ url_for('worker.generate_worker_report') }}">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
                     Generar reporte de Trabajadores
                 </a>

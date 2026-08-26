@@ -36,7 +36,7 @@
                     </a>
                     <div class="submenu">
                         <a href="{{ url_for('sell.query_sales') }}" class="submenu-item">- Venta</a>
-                        <a href="#" class="submenu-item">- Entregas</a>
+                        <a href="{{ url_for('delivery.query_deliveries') }}" class="submenu-item">- Entregas</a>
                         <a href="{{ url_for('client.query_clients') }}" class="submenu-item">- Clientes</a>
                     </div>
                 </div>
@@ -118,6 +118,17 @@
             <form action="{{ url_for('sell.save_sale') }}" method="POST" id="formRegistroVenta">
                 <input type="hidden" name="Fecha" value="{{ fecha_actual }}">
                 <input type="hidden" name="MontoTotal" id="input_monto_total_hidden" value="0.00">
+
+                <!-- Datos de la Venta / Entrega -->
+                <div class="modal-card-proveedor purchase-card-container" style="margin-bottom: 20px;">
+                    <h3 class="modal-card-title">Información de la Venta y Entrega</h3>
+                    <div class="purchase-grid-inputs">
+                        <div class="form-group-item">
+                            <label for="FechaEntrega">Fecha de Entrega Estimada</label>
+                            <input type="date" id="FechaEntrega" name="FechaEntrega" class="form-control-input" value="{{ fecha_actual }}" required>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="modal-card-proveedor purchase-card-container">
                     <h3 class="modal-card-title">Agregar Producto a la Venta</h3>

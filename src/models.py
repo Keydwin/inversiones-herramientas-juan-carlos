@@ -27,6 +27,17 @@ class Compra(db.Model):
 
     proveedor = db.relationship('Proveedor')
 
+class EntregaVenta(db.Model):
+    __tablename__ = 'entregaventa'
+
+    IdEntregaVenta = db.Column(db.Integer, primary_key=True)
+    IdVenta = db.Column(db.Integer, db.ForeignKey('venta.IdVenta'), nullable=False)
+    FechaEntrega = db.Column(db.Date, nullable=False)
+    Estatus = db.Column(db.String(255), nullable=False)
+
+    venta = db.relationship('Venta', backref=db.backref('entregas', lazy=True))
+
+
 class Estado(db.Model):
     __tablename__ = 'estado'
     
