@@ -53,6 +53,23 @@ class Inventario(db.Model):
 
     producto = db.relationship('Producto')
 
+class LibroDiario(db.Model):
+    __tablename__ = 'libro_diario'
+
+    IdLibroDiario = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Fecha = db.Column(db.Date, nullable=False)
+    NumeroDeAsentamiento = db.Column(db.Integer, nullable=False)
+    Concepto = db.Column(db.String(255), nullable=False)
+    Debe = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
+    Haber = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
+
+    IdCompra = db.Column(db.Integer, db.ForeignKey('compra.IdCompra'), nullable=True)
+    IdVenta = db.Column(db.Integer, db.ForeignKey('venta.IdVenta'), nullable=True)
+
+
+    compra = db.relationship('Compra', backref=db.backref('asientos_diarios', lazy=True))
+    venta = db.relationship('Venta', backref=db.backref('asientos_diarios', lazy=True))
+
 class Marca(db.Model):
     __tablename__ = 'marca'
     

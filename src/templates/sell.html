@@ -110,7 +110,17 @@
                         <input type="date" name="end_date" class="opcional" value="{{ end_date }}" title="Fecha Hasta">
                     </div>
 
-                    <button type="submit" style="display: none;"></button>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                    </div>
+
+                    <a href="{{ url_for('sell.query_sales') }}" class="btn-reset" title="Limpiar filtros">
+                        <span class="material-symbols-outlined">restart_alt</span>
+                    </a>
+
+
                 </form> 
 
                 <a href="{{ url_for('sell.select_client_page') }}" class="btn-register">Registrar</a>
@@ -154,7 +164,7 @@
                         </tr>
                         {% else %}
                             <tr>
-                                <td colspan="9" class="text-center">No se encontraron ventas realizadas en dichas fechas establecidas</td>
+                                <td colspan="6" class="text-center">No se encontraron ventas realizadas en dichas fechas establecidas</td>
                             </tr>
                         {% endfor %}
                     </tbody>
