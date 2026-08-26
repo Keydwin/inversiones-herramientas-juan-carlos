@@ -89,29 +89,29 @@
         <main class="content">
             <h1 class="page-title">Estadísticas</h1>
 
-            <div class="filters-card">
-                <form action="{{ url_for('stats.view_statistics') }}" method="GET" class="filters-form">
-                    <div class="filter-group">
-                        <label for="start_date">Desde:</label>
-                        <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="filter-input">
+            <div class="action-bar">
+                <form action="{{ url_for('stats.view_statistics') }}" method="GET" style="display: flex; gap: 10px; align-items: center;">
+                    <div class="search-container">
+                        <span class="material-symbols-outlined search-icon">calendar_today</span>
+                        <input type="date" name="start_date" class="opcional" value="{{ start_date}}" title="Fecha Desde">
                     </div>
 
-                    <div class="filter-group">
-                        <label for="end_date">Hasta:</label>
-                        <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="filter-input">
+                    <div class="search-container">
+                        <span class="material-symbols-outlined search-icon">calendar_today</span>
+                        <input type="date" name="end_date" class="opcional" value="{{ end_date}}" title="Fecha Hasta">
                     </div>
 
                     <div class="filter-actions">
                         <button type="submit" class="btn-filter">
                             <i class="fas fa-filter"></i> Filtrar
                         </button>
+                    </div>
+
                     <a href="{{ url_for('stats.view_statistics') }}" class="btn-reset" title="Limpiar filtros">
                         <span class="material-symbols-outlined">restart_alt</span>
                     </a>
-                    </div>
                 </form>
             </div>
-
 
             <div class="stats-cards-container">
                 <div class="stat-card">

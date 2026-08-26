@@ -14,6 +14,7 @@ from modules.user import user_blueprint
 from modules.client import client_blueprint
 from modules.sell import sell_blueprint
 from modules.deliveries import delivery_blueprint
+from modules.journal import journal_blueprint
 
 app = Flask(__name__)
 
@@ -40,6 +41,7 @@ app.register_blueprint(user_blueprint)
 app.register_blueprint(client_blueprint)
 app.register_blueprint(sell_blueprint)
 app.register_blueprint(delivery_blueprint)
+app.register_blueprint(journal_blueprint)
 
 # PostgreSQL tables are created if they are not already created
 with app.app_context():
