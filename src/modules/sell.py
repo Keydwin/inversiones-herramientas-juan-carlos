@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, make_response, current_app, flash, redirect, url_for, session
-from models import db, Venta, Cliente, Persona, ProductoVenta, Producto, Usuario, Estado, Parroquia, Municipio, Inventario, Trabajador
+# Asegúrate de que EntregaVenta esté importado desde models
+from models import db, Venta, Cliente, Persona, ProductoVenta, Producto, Usuario, Estado, Parroquia, Municipio, Inventario, Trabajador, EntregaVenta
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 import io, os
@@ -82,7 +83,7 @@ def register_sale_page():
     return render_template('register_sale.html', id_cliente=id_cliente, nombre_cliente=nombre_cliente, productos=productos, fecha_actual=fecha_actual)
 
 
-# Process sale, insert items, and update stock
+# Process sale, insert items, update stock, and create delivery record
 @sell_blueprint.route('/save_sale', methods=['POST'])
 def save_sale():
     try:
@@ -98,6 +99,7 @@ def save_sale():
             return redirect(url_for('sell.select_client_page'))
 
         fecha = request.form.get('Fecha')
+        fecha_entrega_str = request.form.get('FechaEntrega')
         monto_total = float(request.form.get('MontoTotal', 0))
         metodo_pago = request.form.get('TipoPago')
 
@@ -134,7 +136,16 @@ def save_sale():
             MontoTotal=monto_total
         )
         db.session.add(nueva_venta)
-        db.session.flush() # Get new sale ID
+        db.session.flush() # Get new sale ID (IdVenta)
+
+        # Save delivery header (EntregaVenta)
+        fecha_entrega = datetime.strptime(fecha_entrega_str, '%Y-%m-%d').date() if fecha_entrega_str else datetime.strptime(fecha, '%Y-%m-%d').date()
+        nueva_entrega = EntregaVenta(
+            IdVenta=nueva_venta.IdVenta,
+            FechaEntrega=fecha_entrega,
+            Estatus='Pendiente'
+        )
+        db.session.add(nueva_entrega)
 
         # Save sale details and update inventory stock
         for id_prod_str, cant_str in zip(ids_productos, cantidades):
@@ -171,7 +182,7 @@ def save_sale():
         session.pop('venta_id_cliente', None)
         session.pop('venta_nombre_cliente', None)
 
-        flash('Venta registrada exitosamente y stock actualizado.', 'success')
+        flash('Venta y registro de entrega procesados exitosamente.', 'success')
         return redirect(url_for('sell.query_sales'))
 
     except Exception as e:
@@ -241,7 +252,6 @@ def generate_seller_report():
     ventas = query_ventas.all()
     ruta_static = os.path.join(current_app.root_path, 'static')
 
-    # Render template with worker and sales data
     html_renderizado = render_template('pdf_seller.html', ventas=ventas, trabajador=trabajador, base_dir=ruta_static)
     output_memoria = io.BytesIO()
     
