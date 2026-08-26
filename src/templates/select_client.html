@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleccionar Proveedor</title>
+    <title>Seleccionar Cliente</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/buy.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sell.js') }}" defer></script>
 </head>
 <body>
     <header class="topbar">
@@ -86,7 +86,7 @@
         </aside>
 
         <main class="content">
-            <h1 class="page-title">Seleccionar Proveedor</h1>
+            <h1 class="page-title">Seleccionar Cliente</h1>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -99,15 +99,15 @@
             {% endwith %}
 
             <div class="action-bar">
-                <form action="{{ url_for('buy.select_provider_page') }}" method="GET">
+                <form action="{{ url_for('sell.select_client_page') }}" method="GET">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" name="supplier" placeholder="Ingresar Nombre para la búsqueda" class="opcional" value="{{ search_query or '' }}">
+                        <input type="text" name="search_cli" placeholder="Ingresar Nombre o Cédula para la búsqueda" class="opcional" value="{{ search_cli or '' }}">
                     </div>
                     <button type="submit" style="display: none;"></button>
                 </form>
 
-                <a class="btn-report" href="{{ url_for('buy.query_purchases') }}">
+                <a class="btn-report" href="{{ url_for('sell.query_sales') }}">
                     <span class="material-symbols-outlined">arrow_back</span>
                     Cancelar
                 </a>
@@ -117,16 +117,30 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Proveedor</th>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Municipio</th>
+                            <th>Parroquia</th>
+                            <th>Dirección</th>
                             <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for prov in proveedores_pagination.items %}
-                        <tr>
-                            <td>{{ prov.NombreProveedor }}</td>
+                        {% for cli in clientes_pagination.items %}
+                            <tr>
+                                <td>{{ cli.persona.Cedula }}</td>
+                                <td>{{ cli.persona.Nombre }}</td>
+                                <td>{{ cli.persona.Apellido }}</td>
+                                <td>{{ cli.persona.Telefono }}</td>
+                                <td>{{ cli.parroquia.municipio.estado.Estado }}</td>
+                                <td>{{ cli.parroquia.municipio.Municipio }}</td>
+                                <td>{{ cli.parroquia.Parroquia }}</td>
+                                <td>{{ cli.Direccion }}</td>
                             <td>
-                                <form action="{{ url_for('buy.save_provider_session', id_proveedor=prov.IdProveedor) }}" method="POST">
+                                <form action="{{ url_for('sell.save_client_session', id_cliente=cli.IdCliente) }}" method="POST">
                                     <button type="submit" class="action-btn select-btn" style="cursor: pointer;">
                                         <span class="material-symbols-outlined">person</span> Seleccionar
                                     </button>
@@ -135,7 +149,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="2" class="text-center">No se encontraron proveedores registrados</td>
+                            <td colspan="9" class="text-center">No se encontraron clientes registrados</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -143,16 +157,16 @@
             </div>
 
             <div class="pagination-container">
-                {% if proveedores_pagination.has_prev %}
-                    <a href="{{ url_for('buy.select_provider_page', page=proveedores_pagination.prev_num, supplier=search_query) }}" class="btn-page">Anterior</a>
+                {% if clientes_pagination.has_prev %}
+                    <a href="{{ url_for('sell.select_client_page', page_cli=clientes_pagination.prev_num, search_cli=search_cli) }}" class="btn-page">Anterior</a>
                 {% else %}
                     <span class="btn-page disabled">Anterior</span>
                 {% endif %}
 
-                <span class="page-indicator">Página {{ proveedores_pagination.page }} de {{ proveedores_pagination.pages if proveedores_pagination.pages > 0 else 1 }}</span>
+                <span class="page-indicator">Página {{ clientes_pagination.page }} de {{ clientes_pagination.pages if clientes_pagination.pages > 0 else 1 }}</span>
 
-                {% if proveedores_pagination.has_next %}
-                    <a href="{{ url_for('buy.select_provider_page', page=proveedores_pagination.next_num, supplier=search_query) }}" class="btn-page">Siguiente</a>
+                {% if clientes_pagination.has_next %}
+                    <a href="{{ url_for('sell.select_client_page', page_cli=clientes_pagination.next_num, search_cli=search_cli) }}" class="btn-page">Siguiente</a>
                 {% else %}
                     <span class="btn-page disabled">Siguiente</span>
                 {% endif %}

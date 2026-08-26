@@ -75,6 +75,7 @@ class Persona(db.Model):
     Apellido = db.Column(db.String(255), nullable=False)
     Telefono = db.Column(db.Integer, nullable=False)
 
+
 class Producto(db.Model):
     __tablename__ = 'producto'
     
@@ -110,8 +111,10 @@ class ProductoVenta(db.Model):
     IdVenta = db.Column(db.Integer, db.ForeignKey('venta.IdVenta'), nullable=False)
     IdProducto = db.Column(db.Integer, db.ForeignKey('producto.IdProducto'), nullable=False)
     Cantidad = db.Column(db.Integer, nullable=False)
+    Subtotal = db.Column(db.Numeric(10, 2), nullable=False)
+    PrecioUnitario = db.Column(db.Numeric(10, 2), nullable=False)
 
-    venta = db.relationship('Venta')
+    venta = db.relationship('Venta', back_populates='productoventa')
     producto = db.relationship('Producto')
 
 class Proveedor(db.Model):
@@ -159,3 +162,5 @@ class Venta(db.Model):
 
     trabajador = db.relationship('Trabajador')
     cliente = db.relationship('Cliente')
+
+    productoventa = db.relationship('ProductoVenta', back_populates='venta')

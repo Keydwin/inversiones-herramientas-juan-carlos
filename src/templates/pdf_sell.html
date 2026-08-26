@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Ventas</title>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Reporte de Ventas</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Estado</th>
+                <th>Municipio</th>
+                <th>Parroquia</th>
+                <th>Monto Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta.FechaVenta.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ venta.cliente.persona.Cedula }}</td>
+                    <td>{{ venta.cliente.persona.Nombre }}</td>
+                    <td>{{ venta.cliente.persona.Apellido }}</td>
+                    <td>{{ venta.cliente.persona.Apellido }}</td>
+                    <td>{{ venta.cliente.parroquia.municipio.estado.Estado }}</td>
+                    <td>{{ venta.cliente.parroquia.municipio.Municipio }}</td>
+                    <td>{{ venta.cliente.parroquia.Parroquia }}</td>
+                    <td>{{ "%.2f"|format(venta.MontoTotal|float) }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No se encontraron registros de ventas.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

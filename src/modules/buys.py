@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, make_response, current_app, flash, redirect, url_for, session
-from models import db, Compra, Proveedor, ProductoCompra, Producto
+from models import db, Compra, Proveedor, ProductoCompra, Producto, Inventario
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 import io, os
@@ -7,15 +7,17 @@ from xhtml2pdf import pisa
 
 buy_blueprint = Blueprint('buy', __name__)
 
+# List purchases with date range filtering and pagination
 @buy_blueprint.route('/compras', methods=['GET'])
 def query_purchases():
-    # Parameters for the main Purchases table
     page = request.args.get('page', 1, type=int)
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
 
-    # joinedload
-    query_compras = Compra.query.options(joinedload(Compra.productocompra).joinedload(ProductoCompra.producto), joinedload(Compra.proveedor)).order_by(Compra.IdCompra.desc())
+    query_compras = Compra.query.options(
+        joinedload(Compra.productocompra).joinedload(ProductoCompra.producto),
+        joinedload(Compra.proveedor)
+    ).order_by(Compra.IdCompra.desc())
 
     if start_date:
         query_compras = query_compras.filter(Compra.Fecha >= datetime.strptime(start_date, '%Y-%m-%d').date())
@@ -24,12 +26,13 @@ def query_purchases():
 
     pagination = query_compras.paginate(page=page, per_page=10, error_out=False)
 
-    # Get product catalog for step 2 registration modal
     productos = Producto.query.all()
     fecha_actual = datetime.now().strftime('%Y-%m-%d')
 
-    return render_template('buy.html', pagination=pagination, productos=productos, fecha_actual=fecha_actual, start_date=start_date,end_date=end_date,)
+    return render_template('buy.html', pagination=pagination, productos=productos, fecha_actual=fecha_actual, start_date=start_date, end_date=end_date)
 
+
+# Search and select a provider for a new purchase
 @buy_blueprint.route('/compras/proveedor', methods=['GET'])
 def select_provider_page():
     page = request.args.get('page_prov', 1, type=int)
@@ -44,18 +47,18 @@ def select_provider_page():
     return render_template('select_provider.html', proveedores_pagination=proveedores_pagination, search_prov=search_prov)
 
 
+# Store selected provider in session and proceed to purchase form
 @buy_blueprint.route('/compras/seleccionar-proveedor/<int:id_proveedor>', methods=['POST'])
 def save_provider_session(id_proveedor):
-    # Save the selected supplier in the Flask session
     prov = Proveedor.query.get_or_404(id_proveedor)
     session['compra_id_proveedor'] = prov.IdProveedor
     session['compra_nombre_proveedor'] = prov.NombreProveedor
     return redirect(url_for('buy.register_purchase_page'))
 
 
+# Render form to select products for the purchase
 @buy_blueprint.route('/compras/productos', methods=['GET'])
 def register_purchase_page():
-    # Validate that a supplier was selected first
     id_proveedor = session.get('compra_id_proveedor')
     nombre_proveedor = session.get('compra_nombre_proveedor')
 
@@ -69,79 +72,90 @@ def register_purchase_page():
     return render_template('register_purchase.html', id_proveedor=id_proveedor, nombre_proveedor=nombre_proveedor, productos=productos, fecha_actual=fecha_actual)
 
 
+# Process purchase, update product prices, and increase inventory
 @buy_blueprint.route('/compras/guardar', methods=['POST'])
 def save_purchase_multi():
     try:
-        # Get header data
-        IdProveedor = session.get('compra_id_proveedor')
-        Fecha_str = request.form.get('Fecha')
-        MontoTotal = float(request.form.get('MontoTotal', 0))
+        id_proveedor = session.get('compra_id_proveedor')
+        fecha_str = request.form.get('Fecha')
+        monto_total = float(request.form.get('MontoTotal', 0))
 
-        if not IdProveedor:
+        if not id_proveedor:
             flash('Sesión expirada. Vuelva a seleccionar el proveedor.', 'danger')
             return redirect(url_for('buy.select_provider_page'))
 
-        Fecha = datetime.strptime(Fecha_str, '%Y-%m-%d').date()
+        # Check if at least one product was submitted in the form
+        if 'productos[0][IdProducto]' not in request.form:
+            flash('Debe agregar al menos un producto a la compra.', 'danger')
+            return redirect(url_for('buy.register_purchase_page'))
 
-        # Compra instance
+        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+
+        # Save purchase header
         nueva_compra = Compra(
-            IdProveedor=int(IdProveedor),
-            Fecha=Fecha,
-            MontoTotal=round(MontoTotal, 2)
+            IdProveedor=int(id_proveedor),
+            Fecha=fecha,
+            MontoTotal=round(monto_total, 2)
         )
         db.session.add(nueva_compra)
-        db.session.flush()
+        db.session.flush() # Generate new purchase ID
 
-        # Iterate over item details sent via form field indices
+        # Loop through purchase line items
         index = 0
         while f'productos[{index}][IdProducto]' in request.form:
-            IdProducto = int(request.form.get(f'productos[{index}][IdProducto]'))
-            Cantidad = int(request.form.get(f'productos[{index}][Cantidad]'))
-            CostoUnitario = float(request.form.get(f'productos[{index}][CostoUnitario]'))
-            Subtotal = round(Cantidad * CostoUnitario, 2)
+            id_producto = int(request.form.get(f'productos[{index}][IdProducto]'))
+            cantidad = int(request.form.get(f'productos[{index}][Cantidad]', 0))
+            costo_unitario = float(request.form.get(f'productos[{index}][CostoUnitario]', 0))
+            subtotal = round(cantidad * costo_unitario, 2)
 
-            prod = Producto.query.get(IdProducto)
+            prod = Producto.query.get(id_producto)
 
-            # Get percentages to recalculate catalog prices (Producto)
+            # Determine cash and credit prices
             precio_contado_form = request.form.get(f'productos[{index}][PrecioDecontado]') or request.form.get(f'productos[{index}][PrecioDeContado]')
             precio_credito_form = request.form.get(f'productos[{index}][PrecioCredito]')
 
             if precio_contado_form and precio_credito_form:
-                PrecioDecontado = round(float(precio_contado_form), 2)
-                PrecioCredito = round(float(precio_credito_form), 2)
+                precio_de_contado = round(float(precio_contado_form), 2)
+                precio_credito = round(float(precio_credito_form), 2)
             else:
-                porc_contado = prod.PorcenajeDeContado if (prod and hasattr(prod, 'PorcenajeDeContado') and prod.PorcenajeDeContado) else 0
-                porc_credito = prod.PorcentajeCredito if (prod and hasattr(prod, 'PorcentajeCredito') and prod.PorcentajeCredito) else 0
+                porc_contado = prod.PorcenajeDeContado if (prod and prod.PorcenajeDeContado) else 0
+                porc_credito = prod.PorcentajeCredito if (prod and prod.PorcentajeCredito) else 0
 
-                PrecioDecontado = round(CostoUnitario * (1 + (porc_contado / 100)), 2)
-                PrecioCredito = round(CostoUnitario * (1 + (porc_credito / 100)), 2)
+                precio_de_contado = round(costo_unitario * (1 + (porc_contado / 100)), 2)
+                precio_credito = round(costo_unitario * (1 + (porc_credito / 100)), 2)
 
-            # ProductoCompra instance (Purchase detail - without removed fields)
+            # 1. Add item detail to purchase
             detalle = ProductoCompra(
                 IdCompra=nueva_compra.IdCompra,
-                IdProducto=IdProducto,
-                Cantidad=Cantidad,
-                CostoUnitario=CostoUnitario,
-                Subtotal=Subtotal
+                IdProducto=id_producto,
+                Cantidad=cantidad,
+                CostoUnitario=costo_unitario,
+                Subtotal=subtotal
             )
             db.session.add(detalle)
 
-            # Update catalog prices in the Producto table
-            if prod:
-                if hasattr(prod, 'PrecioDecontado'):
-                    prod.PrecioDecontado = PrecioDecontado
-                elif hasattr(prod, 'PrecioDeContado'):
-                    prod.PrecioDeContado = PrecioDecontado
+            # 2. Increase inventory stock or create new record
+            inv = Inventario.query.filter_by(IdProducto=id_producto).first()
+            if inv:
+                inv.CantidadProducto += cantidad
+            else:
+                nuevo_inventario = Inventario(
+                    IdProducto=id_producto,
+                    CantidadProducto=cantidad
+                )
+                db.session.add(nuevo_inventario)
 
-                if hasattr(prod, 'PrecioCredito'):
-                    prod.PrecioCredito = PrecioCredito
+            # 3. Update selling prices in product table
+            if prod:
+                prod.PrecioDeContado = precio_de_contado
+                prod.PrecioCredito = precio_credito
 
             index += 1
 
         db.session.commit()
-        flash('Compra Registrado con éxito.', 'success')
+        flash('Compra e inventario registrados con éxito.', 'success')
 
-        # Clear session variables
+        # Clear session data
         session.pop('compra_id_proveedor', None)
         session.pop('compra_nombre_proveedor', None)
 
@@ -153,46 +167,34 @@ def save_purchase_multi():
         return redirect(url_for('buy.register_purchase_page'))
 
 
+# Generate purchases PDF report
 @buy_blueprint.route('/compras/buy_report')
 def generate_buy_report():
-    # Get date parameters from GET request
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
 
-    # Initialize base query with eager loading
     query_compras = Compra.query.options(
         joinedload(Compra.proveedor)
     ).order_by(Compra.Fecha.asc())
     
-    # Apply date filters if provided
     if start_date:
         query_compras = query_compras.filter(Compra.Fecha >= datetime.strptime(start_date, '%Y-%m-%d').date())
     if end_date:
         query_compras = query_compras.filter(Compra.Fecha <= datetime.strptime(end_date, '%Y-%m-%d').date())
 
-    # Get filtered results
     compras = query_compras.all()
-    
-    # Absolute path to static directory
     ruta_static = os.path.join(current_app.root_path, 'static')
     
-    # Render HTML template with data and static directory path
     html_renderizado = render_template('pdf_buy.html', compras=compras, base_dir=ruta_static)
-    
-    # Create in-memory bytes buffer
     output_memoria = io.BytesIO()
     
-    # Convert HTML to PDF
     pisa_status = pisa.CreatePDF(html_renderizado, dest=output_memoria)
     
-    # Check for rendering errors
     if pisa_status.err:
         return "Error al generar el PDF", 500
         
-    # Move pointer to the beginning of the buffer
     output_memoria.seek(0)
     
-    # Send PDF file to browser
     response = make_response(output_memoria.getvalue())
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'attachment; filename=reporte_compras.pdf'
