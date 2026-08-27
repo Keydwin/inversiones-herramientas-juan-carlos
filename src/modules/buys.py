@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, make_response, current_app, flash, redirect, url_for, session
-from models import db, Compra, Proveedor, ProductoCompra, Producto, Inventario
+from models import db, Compra, Proveedor, ProductoCompra, Producto, Inventario, LibroDiario
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 import io, os
@@ -152,8 +152,16 @@ def save_purchase_multi():
 
             index += 1
 
+            asiento_diario = LibroDiario(
+            Fecha=fecha,
+            Concepto=f"Compra de mercancía para inventario - Compra N° {nueva_compra.IdCompra}",
+            Debe=round(monto_total, 2),
+            IdCompra=nueva_compra.IdCompra
+        )
+        db.session.add(asiento_diario)
+
         db.session.commit()
-        flash('Compra e inventario registrados con éxito.', 'success')
+        flash('Compra, inventario y asiento en Libro Diario registrados con éxito.', 'success')
 
         # Clear session data
         session.pop('compra_id_proveedor', None)
