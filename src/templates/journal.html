@@ -101,12 +101,12 @@
                 <form action="{{ url_for('journal.query_journal_entries') }}" method="GET" style="display: flex; gap: 10px; align-items: center;">
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">calendar_today</span>
-                        <input type="date" name="start_date" class="opcional" value="{{ start_date or '' }}" title="Fecha Desde">
+                        <input type="date" id="start_date" name="start_date" class="opcional" value="{{ start_date or '' }}" title="Fecha Desde">
                     </div>
 
                     <div class="search-container">
                         <span class="material-symbols-outlined search-icon">calendar_today</span>
-                        <input type="date" name="end_date" class="opcional" value="{{ end_date or '' }}" title="Fecha Hasta">
+                        <input type="date" id="end_date" name="end_date" class="opcional" value="{{ end_date or '' }}" title="Fecha Hasta">
                     </div>
 
                     <div class="filter-actions">
@@ -120,7 +120,7 @@
                     </a>
                 </form>
 
-                <a class="btn-report" id="btnGenerarPdf" target="_self" href="#">
+                <a class="btn-report" id="btnGenerarPdf" target="_blank" href="#">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
                     Generar reporte de Libro Diario
                 </a>
@@ -172,5 +172,38 @@
             </div>
         </main>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnPdf = document.getElementById('btnGenerarPdf');
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+
+            function updatePdfLink() {
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+                
+                // Genera la URL apuntando al endpoint de reporte (asumiendo que se llama 'journal.generate_pdf')
+                let pdfUrl = "{{ url_for('journal.generate_pdf') }}";
+                
+                const params = new URLSearchParams();
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+
+                if (params.toString()) {
+                    pdfUrl += '?' + params.toString();
+                }
+
+                btnPdf.setAttribute('href', pdfUrl);
+            }
+
+            // Actualizar enlace al cargar la página
+            updatePdfLink();
+
+            // Actualizar en tiempo real si el usuario cambia las fechas en el formulario sin enviar
+            startDateInput.addEventListener('change', updatePdfLink);
+            endDateInput.addEventListener('change', updatePdfLink);
+        });
+    </script>
 </body>
 </html>
