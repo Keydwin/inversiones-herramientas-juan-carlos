@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, make_response, current_app, flash, redirect, url_for, session
-from models import db, Compra, Proveedor, ProductoCompra, Producto, Inventario
+from models import db, Compra, Proveedor, ProductoCompra, Producto, Inventario, LibroDiario
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 import io, os
@@ -124,7 +124,7 @@ def save_purchase_multi():
                 precio_de_contado = round(costo_unitario * (1 + (porc_contado / 100)), 2)
                 precio_credito = round(costo_unitario * (1 + (porc_credito / 100)), 2)
 
-            # 1. Add item detail to purchase
+            # Add item detail to purchase
             detalle = ProductoCompra(
                 IdCompra=nueva_compra.IdCompra,
                 IdProducto=id_producto,
@@ -134,7 +134,7 @@ def save_purchase_multi():
             )
             db.session.add(detalle)
 
-            # 2. Increase inventory stock or create new record
+            # Increase inventory stock or create new record
             inv = Inventario.query.filter_by(IdProducto=id_producto).first()
             if inv:
                 inv.CantidadProducto += cantidad
@@ -145,15 +145,23 @@ def save_purchase_multi():
                 )
                 db.session.add(nuevo_inventario)
 
-            # 3. Update selling prices in product table
+            # Update selling prices in product table
             if prod:
                 prod.PrecioDeContado = precio_de_contado
                 prod.PrecioCredito = precio_credito
 
             index += 1
 
+            asiento_diario = LibroDiario(
+            Fecha=fecha,
+            Concepto=f"Compra de mercancía para inventario - Compra N° {nueva_compra.IdCompra}",
+            Debe=round(monto_total, 2),
+            IdCompra=nueva_compra.IdCompra
+        )
+        db.session.add(asiento_diario)
+
         db.session.commit()
-        flash('Compra e inventario registrados con éxito.', 'success')
+        flash('Compra, inventario y asiento en Libro Diario registrados con éxito.', 'success')
 
         # Clear session data
         session.pop('compra_id_proveedor', None)

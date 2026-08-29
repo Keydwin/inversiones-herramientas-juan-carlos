@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, make_response, current_app, flash, redirect, url_for, session
 # Asegúrate de que EntregaVenta esté importado desde models
-from models import db, Venta, Cliente, Persona, ProductoVenta, Producto, Usuario, Estado, Parroquia, Municipio, Inventario, Trabajador, EntregaVenta
+from models import db, Venta, Cliente, Persona, ProductoVenta, Producto, Usuario, Estado, Parroquia, Municipio, Inventario, Trabajador, EntregaVenta,LibroDiario
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 import io, os
@@ -112,6 +112,10 @@ def save_sale():
             flash('Debe agregar al menos un producto a la venta.', 'danger')
             return redirect(url_for('sell.register_sale_page'))
 
+        if not fecha_entrega_str:
+                    flash('Debe Agregar una Fecha.', 'danger')
+                    return redirect(url_for('sell.register_sale_page'))
+
         # Check stock availability before saving
         for id_prod_str, cant_str in zip(ids_productos, cantidades):
             id_prod = int(id_prod_str)
@@ -127,11 +131,13 @@ def save_sale():
                 flash(f'Stock insuficiente para el producto "{nombre}". Disponible: {stock_actual}, Solicitado: {cantidad}.', 'danger')
                 return redirect(url_for('sell.register_sale_page'))
 
+        fecha_dt = datetime.strptime(fecha, '%Y-%m-%d').date()
+
         # Save sale header
         nueva_venta = Venta(
             IdTrabajador=id_trabajador,
             IdCliente=id_cliente,
-            FechaVenta=datetime.strptime(fecha, '%Y-%m-%d').date(),
+            FechaVenta=fecha_dt,
             MetodoPago=metodo_pago,
             MontoTotal=monto_total
         )
@@ -139,7 +145,7 @@ def save_sale():
         db.session.flush() # Get new sale ID (IdVenta)
 
         # Save delivery header (EntregaVenta)
-        fecha_entrega = datetime.strptime(fecha_entrega_str, '%Y-%m-%d').date() if fecha_entrega_str else datetime.strptime(fecha, '%Y-%m-%d').date()
+        fecha_entrega = datetime.strptime(fecha_entrega_str, '%Y-%m-%d').date() if fecha_entrega_str else fecha_dt
         nueva_entrega = EntregaVenta(
             IdVenta=nueva_venta.IdVenta,
             FechaEntrega=fecha_entrega,
@@ -176,13 +182,21 @@ def save_sale():
             if inv:
                 inv.CantidadProducto -= cantidad
 
+        asiento_diario = LibroDiario(
+        Fecha=fecha_dt,
+        Concepto=f"Venta de mercancía ({metodo_pago}) - Venta N° {nueva_venta.IdVenta}",
+        Haber=round(monto_total, 2),
+        IdVenta=nueva_venta.IdVenta
+        )
+        db.session.add(asiento_diario)
+
         db.session.commit()
 
         # Clear client data from session
         session.pop('venta_id_cliente', None)
         session.pop('venta_nombre_cliente', None)
 
-        flash('Venta y registro de entrega procesados exitosamente.', 'success')
+        flash('Venta, registro de entrega y asiento en Libro Diario procesados exitosamente.', 'success')
         return redirect(url_for('sell.query_sales'))
 
     except Exception as e:

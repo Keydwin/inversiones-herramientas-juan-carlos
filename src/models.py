@@ -58,7 +58,7 @@ class LibroDiario(db.Model):
 
     IdLibroDiario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Fecha = db.Column(db.Date, nullable=False)
-    NumeroDeAsentamiento = db.Column(db.Integer, nullable=False)
+    NumeroDeAsentamiento = db.Column(db.Integer, autoincrement=True, server_default=db.FetchedValue(), nullable=False)
     Concepto = db.Column(db.String(255), nullable=False)
     Debe = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
     Haber = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
