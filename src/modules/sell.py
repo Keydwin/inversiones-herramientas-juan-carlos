@@ -112,6 +112,10 @@ def save_sale():
             flash('Debe agregar al menos un producto a la venta.', 'danger')
             return redirect(url_for('sell.register_sale_page'))
 
+        if not fecha_entrega_str:
+                    flash('Debe Agregar una Fecha.', 'danger')
+                    return redirect(url_for('sell.register_sale_page'))
+
         # Check stock availability before saving
         for id_prod_str, cant_str in zip(ids_productos, cantidades):
             id_prod = int(id_prod_str)
