@@ -4,7 +4,7 @@ from models import Usuario
 login_blueprint = Blueprint('login', __name__)
 
 def _obtener_credenciales():
-    """Get credentials from JSON or HTML form."""
+    # Get credentials from JSON or HTML form
     if request.is_json:
         data = request.get_json(silent=True) or {}
         username = (data.get('usuario') or data.get('NombreUsuario') or '').strip()
@@ -18,7 +18,7 @@ def _obtener_credenciales():
 
 @login_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
-    """Render login page and authenticate user."""
+    # Render login page and authenticate user
     if session.get('usuario_id') and request.method == 'GET':
         return redirect(url_for('product.query_products'))
 
@@ -53,14 +53,14 @@ def login():
 
 @login_blueprint.route('/logout', methods=['GET', 'POST'])
 def logout():
-    """Clear user session and redirect to login."""
+    # Clear user session and redirect to login
     session.clear()
     return redirect(url_for('login.login'))
 
 
 @login_blueprint.before_app_request
 def requerir_login():
-    """Protect routes silently without flash messages."""
+    # Protect routes silently without flash messages
     public_endpoints = ['login.login', 'static']
 
     if request.endpoint and request.endpoint not in public_endpoints:

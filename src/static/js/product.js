@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-// CONTROL SEGURO DE LA MODAL DE PRODUCTOS
+
     const productModal = document.getElementById('ProductModal');
     const openProductBtn = document.getElementById('openProductBtn');
     const closeProductBtn = document.getElementById('closeProductBtn');

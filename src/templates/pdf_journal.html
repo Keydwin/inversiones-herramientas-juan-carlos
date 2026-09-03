@@ -23,7 +23,6 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Nº Asent.</th>
                 <th>Fecha</th>
                 <th>Concepto</th>
                 <th style="text-align: right;">Debe</th>
@@ -33,28 +32,27 @@
         <tbody>
             {% for registro in asientos %}
                 <tr>
-                    <td style="text-align: center;">#{{ registro.NumeroDeAsentamiento }}</td>
-                    <td style="text-align: center;">
+                    <td>
                         {{ registro.Fecha.strftime('%d/%m/%Y') if registro.Fecha else '' }}
                     </td>
                     <td>{{ registro.Concepto }}</td>
-                    <td style="text-align: right;">
+                    <td>
                         {{ "%.2f"|format(registro.Debe|float) }}
                     </td>
-                    <td style="text-align: right;">
+                    <td>
                         {{ "%.2f"|format(registro.Haber|float) }}
                     </td>
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center;">No se encontraron registros de asientos contables.</td>
+                    <td colspan="4" style="text-align: center;">No se encontraron registros de asientos contables.</td>
                 </tr>
             {% endfor %}
         </tbody>
         {% if asientos %}
         <tfoot>
             <tr style="font-weight: bold; background-color: #f2f2f2;">
-                <td colspan="3" style="text-align: right;">TOTALES PERIODO:</td>
+                <td colspan="2" style="text-align: right;">TOTALES PERIODO:</td>
                 <td style="text-align: right;">{{ "%.2f"|format(total_debe|float) }}</td>
                 <td style="text-align: right;">{{ "%.2f"|format(total_haber|float) }}</td>
             </tr>
