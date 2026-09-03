@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/journal.js') }}" defer></script>
 </head>
 <body>
     <header class="topbar">
@@ -120,10 +121,10 @@
                     </a>
                 </form>
 
-                <a class="btn-report" id="btnGenerarPdf" target="_self" href="#">
+                <button type="button" class="btn-report" id="btnGenerarPdf" onclick="abrirModalReporte()">
                     <span class="material-symbols-outlined">picture_as_pdf</span>
                     Generar reporte de Libro Diario
-                </a>
+                </button>
             </div>
 
             <div class="table-responsive">
@@ -148,7 +149,7 @@
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="5" class="text-center">No se encontraron asientos contables en el rango seleccionado</td>
+                                <td colspan="5" class="text-center">No se encontraron asientos contables en las fechas seleccionadas</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -171,6 +172,27 @@
                 {% endif %}
             </div>
         </main>
+    </div>
+
+    <div class="modal-overlay" id="modalReportePdf" style="display: none;">
+        <div class="modal-card">
+            <h2>Generar Reporte de Libro Diario</h2>
+            <form id="formReportePdf" action="{{ url_for('journal.generate_journal_report') }}" method="GET">
+                <div class="form-group">
+                    <label for="pdf_start_date">Fecha Desde</label>
+                    <input type="date" id="pdf_start_date" name="start_date" value="{{ start_date or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="pdf_end_date">Fecha Hasta</label>
+                    <input type="date" id="pdf_end_date" name="end_date" value="{{ end_date or '' }}">
+                </div>
+                <div class="form-error"></div>
+                <div class="actions">
+                    <button type="button" class="btn-cancel" onclick="cerrarModalReporte()">Cancelar</button>
+                    <button type="submit" class="btn-modify">Generar PDF</button>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 </html>

@@ -1,7 +1,7 @@
-// Variable global para almacenar el total de la venta
+// Global variable to store total sale amount
 let totalVenta = 0.0;
 
-// 1. Evento al seleccionar un producto en el <select>
+//  Triggered when selecting a product from the dropdown
 function alSeleccionarProductoVenta() {
     const selectorProducto = document.getElementById('selector_producto_venta');
     if (!selectorProducto) return;
@@ -13,25 +13,25 @@ function alSeleccionarProductoVenta() {
         return;
     }
 
-    // Leer tipo de pago actual
+    // Read current payment type
     const tipoPago = document.getElementById('selector_tipo_pago').value;
     
-    // Obtener precios desde los data-attributes del <option>
+    // Get prices from option data attributes
     const precioContado = parseFloat(optionSeleccionada.getAttribute('data-precio-contado')) || 0;
     const precioCredito = parseFloat(optionSeleccionada.getAttribute('data-precio-credito')) || 0;
 
-    // Asignar precio al input visual según tipo de pago
+    // Set price based on selected payment type
     const precioAplicado = (tipoPago === 'Crédito') ? precioCredito : precioContado;
     document.getElementById('input_precio_unitario').value = precioAplicado.toFixed(2);
 }
 
-// 2. Evento al cambiar el tipo de pago (Contado / Crédito)
+//  Triggered when changing payment type (Cash / Credit)
 function alCambiarTipoPago() {
-    // Actualiza el precio del producto que esté actualmente seleccionado en el combo
+    // Update price for currently selected product
     alSeleccionarProductoVenta();
 }
 
-// 3. Agregar fila a la tabla visual
+//  Add row to the sales table
 function agregarProductoVentaTabla() {
     const selectorProducto = document.getElementById('selector_producto_venta');
     const selectorTipoPago = document.getElementById('selector_tipo_pago');
@@ -45,14 +45,14 @@ function agregarProductoVentaTabla() {
     const cantidad = parseInt(inputCantidad.value);
     const precioUnitario = parseFloat(inputPrecio.value);
 
-    // Validación silenciosa: si faltan datos o son inválidos, se detiene sin mostrar alerta
+    // Silent validation: stop if data is missing or invalid
     if (!idProducto || isNaN(cantidad) || cantidad <= 0 || isNaN(precioUnitario)) {
         return;
     }
 
     const subtotal = cantidad * precioUnitario;
 
-    // Eliminar la fila "No se han agregado productos" si existe
+    // Remove empty table placeholder row if present
     if (rowVacia) {
         rowVacia.remove();
     }
@@ -79,21 +79,21 @@ function agregarProductoVentaTabla() {
 
     tbody.appendChild(tr);
 
-    // Bloquear el select de tipo de pago al agregar el primer producto
+    // Disable payment type select after adding the first item
     if (selectorTipoPago) {
         selectorTipoPago.disabled = true;
     }
 
-    // Recalcular total visual
+    // Recalculate total
     recalcularTotalVenta();
 
-    // Resetear controles
+    // Reset input fields
     selectorProducto.value = '';
     inputCantidad.value = '';
     inputPrecio.value = '';
 }
 
-// 4. Eliminar fila de la tabla
+//  Remove a row from the table
 function eliminarFila(btn) {
     const tr = btn.closest('tr');
     tr.remove();
@@ -101,7 +101,7 @@ function eliminarFila(btn) {
     const tbody = document.getElementById('tbodyDetalleNuevaVenta');
     const selectorTipoPago = document.getElementById('selector_tipo_pago');
 
-    // Si la tabla queda vacía, restaurar estado inicial y desbloquear el tipo de pago
+    // Restore empty state and enable payment type if table is empty
     if (tbody.children.length === 0) {
         tbody.innerHTML = `
             <tr id="row_vacia_tabla">
@@ -116,12 +116,12 @@ function eliminarFila(btn) {
     recalcularTotalVenta();
 }
 
-// Alias por compatibilidad
+// Alias for backwards compatibility
 function eliminarFilaVenta(btn) {
     eliminarFila(btn);
 }
 
-// 5. Recalcular total general de la venta (Visual)
+//  Recalculate grand total amount
 function recalcularTotalVenta() {
     const filas = document.querySelectorAll('#tbodyDetalleNuevaVenta tr[data-subtotal]');
     let total = 0;
@@ -137,7 +137,7 @@ function recalcularTotalVenta() {
     if (elemInput) elemInput.value = total.toFixed(2);
 }
 
-// --- Funciones Base Generales para Modales ---
+//  Base Helper Functions for Modals 
 function abrirModal(id) {
     const modal = document.getElementById(id);
     if (modal) {
@@ -154,7 +154,7 @@ function cerrarModal(id) {
     }
 }
 
-// --- Modales de Detalle de Venta ---
+//  Sale Detail Modals 
 function abrirModalDetalle(idVenta) {
     abrirModal(`modalDetalle${idVenta}`);
 }
@@ -163,7 +163,7 @@ function cerrarModalDetalle(idVenta) {
     cerrarModal(`modalDetalle${idVenta}`);
 }
 
-// --- Modal Reporte General ---
+//  General Report Modal 
 function abrirModalReporte() {
     abrirModal('modalReportePdf');
 }
@@ -172,7 +172,7 @@ function cerrarModalReporte() {
     cerrarModal('modalReportePdf');
 }
 
-// --- Modal Mi Reporte (Vendedor Personal) ---
+//  Seller Personal Report Modal 
 function abrirModalReporteVendedor() {
     abrirModal('modalReporteVendedorPdf');
 }
@@ -181,7 +181,7 @@ function cerrarModalReporteVendedor() {
     cerrarModal('modalReporteVendedorPdf');
 }
 
-// Habilitar el tipo de pago antes de enviar el formulario POST a Flask
+// Re-enable payment type select before submitting form to Flask
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formRegistroVenta');
     if (form) {

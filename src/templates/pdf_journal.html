@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte Libro Diario</title>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">
+                    Reporte de Libro Diario
+                    {% if start_date and end_date %}
+                        ({{ start_date }} al {{ end_date }})
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th style="text-align: right;">Debe</th>
+                <th style="text-align: right;">Haber</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in asientos %}
+                <tr>
+                    <td>
+                        {{ registro.Fecha.strftime('%d/%m/%Y') if registro.Fecha else '' }}
+                    </td>
+                    <td>{{ registro.Concepto }}</td>
+                    <td>
+                        {{ "%.2f"|format(registro.Debe|float) }}
+                    </td>
+                    <td>
+                        {{ "%.2f"|format(registro.Haber|float) }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center;">No se encontraron registros de asientos contables.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        {% if asientos %}
+        <tfoot>
+            <tr style="font-weight: bold; background-color: #f2f2f2;">
+                <td colspan="2" style="text-align: right;">TOTALES PERIODO:</td>
+                <td style="text-align: right;">{{ "%.2f"|format(total_debe|float) }}</td>
+                <td style="text-align: right;">{{ "%.2f"|format(total_haber|float) }}</td>
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

@@ -235,11 +235,11 @@
             <form id="formReportePdf" action="{{ url_for('buy.generate_buy_report') }}" method="GET" target="_blank">
                 <div class="form-group">
                     <label for="pdf_start_date">Fecha Desde</label>
-                    <input type="date" id="pdf_start_date" name="start_date" value="{{ start_date }}" required>
+                    <input type="date" id="pdf_start_date" name="start_date" value="{{ start_date }}">
                 </div>
                 <div class="form-group">
                     <label for="pdf_end_date">Fecha Hasta</label>
-                    <input type="date" id="pdf_end_date" name="end_date" value="{{ end_date }}" required>
+                    <input type="date" id="pdf_end_date" name="end_date" value="{{ end_date }}">
                 </div>
                 <div class="form-error"></div>
                 <div class="actions">
