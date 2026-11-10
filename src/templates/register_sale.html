@@ -116,7 +116,7 @@
             </div>
 
             <form action="{{ url_for('sell.save_sale') }}" method="POST" id="formRegistroVenta">
-                <input type="hidden" name="Fecha">
+                <input type="hidden" name="Fecha" value="{{ fecha_actual }}">
                 <input type="hidden" name="MontoTotal" id="input_monto_total_hidden" value="0.00">
 
                 <div class="modal-card-proveedor purchase-card-container">

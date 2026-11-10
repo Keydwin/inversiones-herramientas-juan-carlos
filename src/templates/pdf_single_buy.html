@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="{{ base_dir }}/css/pdf_style.css">
+    <meta charset="UTF-8">
+    <title>Reporte de Compra</title>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="title">Inversiones Herramientas Juan Carlos</div>
+                <div class="subtitle">Compra</div>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-bottom: 15px; font-size: 13px; line-height: 1.5;">
+        <p><strong>Proveedor:</strong> {{ compra.proveedor.NombreProveedor.strip() }}</p>
+        <p><strong>Fecha de Compra:</strong> {{ compra.Fecha.strftime('%d/%m/%Y') }}</p>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th style="text-align: center;">Cantidad</th>
+                <th style="text-align: right;">Costo Unitario</th>
+                <th style="text-align: right;">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in compra.productocompra %}
+                <tr>
+                    <td>{{ detalle.producto.NombreProducto if detalle.producto else 'N/A' }}</td>
+                    <td style="text-align: center;">{{ detalle.Cantidad }}</td>
+                    <td style="text-align: right;">{{ "%.2f"|format(detalle.CostoUnitario|float) }}</td>
+                    <td style="text-align: right;">{{ "%.2f"|format(detalle.Subtotal|float) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px; text-align: right; font-size: 15px; font-weight: bold;">
+        Monto Total: {{ "%.2f"|format(compra.MontoTotal|float) }}
+    </div>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

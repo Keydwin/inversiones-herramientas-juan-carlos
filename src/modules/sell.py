@@ -113,8 +113,8 @@ def save_sale():
             return redirect(url_for('sell.register_sale_page'))
 
         if not fecha_entrega_str:
-                    flash('Debe Agregar una Fecha.', 'danger')
-                    return redirect(url_for('sell.register_sale_page'))
+            flash('Debe Agregar una Fecha de Entrega.', 'danger')
+            return redirect(url_for('sell.register_sale_page'))
 
         # Check stock availability before saving
         for id_prod_str, cant_str in zip(ids_productos, cantidades):
@@ -182,11 +182,16 @@ def save_sale():
             if inv:
                 inv.CantidadProducto -= cantidad
 
+        ultimo_asiento = db.session.query(db.func.max(LibroDiario.NumeroDeAsentamiento)).scalar()
+        siguiente_asiento = (ultimo_asiento or 0) + 1
+
+        #Create a journal entry recording the sale in the credit column.
         asiento_diario = LibroDiario(
-        Fecha=fecha_dt,
-        Concepto=f"Venta de mercancía ({metodo_pago}) - Venta N° {nueva_venta.IdVenta}",
-        Haber=round(monto_total, 2),
-        IdVenta=nueva_venta.IdVenta
+            NumeroDeAsentamiento=siguiente_asiento,
+            Fecha=fecha_dt,
+            Concepto=f"Venta de mercancía ({metodo_pago}) - Venta N° {nueva_venta.IdVenta}",
+            Haber=round(monto_total, 2),
+            IdVenta=nueva_venta.IdVenta
         )
         db.session.add(asiento_diario)
 

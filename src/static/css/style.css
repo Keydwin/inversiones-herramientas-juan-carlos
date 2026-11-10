@@ -319,7 +319,7 @@ body {
 
 .data-table th:last-child,
 .data-table td:last-child {
-    width: 220px;       
+    width: 260px;       
     text-align: center;
     white-space: nowrap;
 }
@@ -392,13 +392,26 @@ body {
     background-color: #f0fdf4; 
     color: #15803d; 
     border: 1px solid #dcfce7;
+    text-decoration: none;
 }
+
 .details-btn:hover {
     background-color: #dcfce7;
     border-color: #bbf7d0;
     transform: translateY(-1px);
 }
 
+.buy-btn{
+    background-color: #fcdcdc;
+    border-color: #f7bbbb;
+    transform: translateY(-1px);
+}
+
+.buy-btn:hover {
+    background-color: #fcdcdc;
+    border-color: #f7bbbb;
+    transform: translateY(-1px);
+}
 
 .pay-btn {
     background-color: #fffbeb; 
