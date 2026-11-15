@@ -152,7 +152,13 @@ def save_purchase_multi():
 
             index += 1
 
-            asiento_diario = LibroDiario(
+        # We are looking for the latest settlement number recorded in the database.
+        ultimo_asiento = db.session.query(db.func.max(LibroDiario.NumeroDeAsentamiento)).scalar()
+        siguiente_asiento = (ultimo_asiento or 0) + 1
+
+        # We create the single entry in the General Journal for the purchase.
+        asiento_diario = LibroDiario(
+            NumeroDeAsentamiento=siguiente_asiento,
             Fecha=fecha,
             Concepto=f"Compra de mercancía para inventario - Compra N° {nueva_compra.IdCompra}",
             Debe=round(monto_total, 2),
@@ -206,5 +212,34 @@ def generate_buy_report():
     response = make_response(output_memoria.getvalue())
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'attachment; filename=reporte_compras.pdf'
+    
+    return response
+
+# Generate single purchase PDF report
+@buy_blueprint.route('/compras/detalle_report/<int:id_compra>')
+def generate_single_buy_report(id_compra):
+    compra = Compra.query.options(
+        joinedload(Compra.productocompra).joinedload(ProductoCompra.producto),
+        joinedload(Compra.proveedor)
+    ).get_or_404(id_compra)
+    
+    ruta_static = os.path.join(current_app.root_path, 'static')
+    
+    # Renderizamos una plantilla para el reporte individual
+    html_renderizado = render_template('pdf_single_buy.html', compra=compra, base_dir=ruta_static)
+    output_memoria = io.BytesIO()
+    
+    pisa_status = pisa.CreatePDF(html_renderizado, dest=output_memoria)
+    
+    if pisa_status.err:
+        return "Error al generar el PDF de la compra", 500
+        
+    output_memoria.seek(0)
+    
+    response = make_response(output_memoria.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=reporte_compra_{compra.IdCompra}.pdf'
+    
+    response.headers['Content-Disposition'] = f'inline; filename=reporte_compra_{compra.IdCompra}.pdf'
     
     return response
